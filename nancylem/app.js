@@ -89,18 +89,26 @@
 
   // overview
   function buildOverview() {
-    overview.innerHTML = state.deck.slides.map((s, j) => `
-      <div class="ov-card" data-i="${j}">
-        <span class="ov-num">${j + 1}</span>
-        <span class="ov-kick">${(s.kicker || s.section || "").replace(/"/g, "")}</span>
-        <span class="ov-lbl">${(s.title || s.bucket_label || s.funnel_label || s.section)}</span>
-      </div>`).join("");
+    const meta = state.deck.meta, total = slideCount();
+    overview.innerHTML = state.deck.slides.map((s, j) => {
+      const lbl = (s.title || s.bucket_label || s.funnel_label || s.section || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      return `<div class="ov-card" data-i="${j}">
+        <div class="ov-thumb"><div class="slide ${LEMSlides.isDark(s) ? "dark" : ""}">${LEMSlides.render(s, meta, j, total)}</div></div>
+        <div class="ov-cap"><span class="ov-num">${j + 1}</span>${lbl}</div>
+      </div>`;
+    }).join("");
+    // scale each mini-slide to fit its thumbnail width (real Canva-style previews)
+    overview.querySelectorAll(".ov-thumb").forEach(th => {
+      const el = th.querySelector(".slide");
+      el.style.transform = `scale(${th.clientWidth / 1280})`;
+    });
     overview.querySelectorAll(".ov-card").forEach(c =>
       c.addEventListener("click", () => { toggleOverview(false); go(+c.dataset.i); }));
   }
   function toggleOverview(force) {
     const show = force == null ? overview.hidden : force;
-    if (show) { buildOverview(); overview.hidden = false; }
+    if (show) { overview.hidden = false; buildOverview(); }   // visible first so thumbs can measure width
     else overview.hidden = true;
   }
 

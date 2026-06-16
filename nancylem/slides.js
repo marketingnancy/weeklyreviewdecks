@@ -130,32 +130,51 @@
       <div class="s-foot-note">${esc(slide.footnote || "")}</div>`;
   }
 
-  // ── slides 14–17: age & gender (manual) ───────────────────────────────────
+  // ── slides 14–17: age & gender (from NANCY LEM.xlsx · Campaign Breakdown) ───
   function demographics(slide, meta) {
     if (!slide.available) {
       return `${header(slide, meta)}
         <div class="demo-panel"><div class="demo-unavail">
-          <div class="du-title">Age &amp; gender source unavailable</div>
-          <div class="du-sub">Glued does not expose demographic breakdowns for this report. Add data to <code>data/demographics.json</code> to populate this slide.</div>
+          <div class="du-title">Age &amp; gender data not loaded</div>
+          <div class="du-sub">Populate it from the LEM workbook: <code>python3 -m scripts.gen_demographics</code>.</div>
         </div></div>`;
     }
+    const src = `Best-converting age × gender per campaign · purchases · ${esc(slide.campaigns || "")} campaigns · source: ${esc(slide.source || "NANCY LEM.xlsx")}`;
+    if (slide.view === "table") {
+      const rows = slide.rows.map(r => `<tr>
+          <td class="cmp">${esc(r.campaign)}</td>
+          <td class="seg good">${esc(r.best)}</td>
+          <td class="num">${typeof r.best_roas === "number" ? r.best_roas.toFixed(2) : esc(r.best_roas)}</td>
+          <td class="num">${esc(r.best_purch)}</td>
+          <td class="seg bad">${esc(r.worst)}</td>
+          <td class="num">${typeof r.worst_roas === "number" ? r.worst_roas.toFixed(2) : esc(r.worst_roas)}</td>
+        </tr>`).join("");
+      return `${header(slide, meta)}
+        <div class="demo-srcline"><span class="demo-manual">from workbook${slide.updated ? " · " + esc(slide.updated) : ""}</span></div>
+        <table class="demotable">
+          <thead><tr><th>Campaign</th><th>Best audience</th><th>ROAS</th><th>Purchases</th><th>Worst audience</th><th>ROAS</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="s-foot-note">Best / worst age × gender segment per campaign · ${esc(slide.campaigns || "")} campaigns with data</div>`;
+    }
+    // chart view
     const cap = slide.funnel === "website_direct" ? "Website LP" : "Pre-Lander LP";
     return `${header(slide, meta)}
       <div class="demo-panel">
         <div class="demo-top">
           <div>
             <div class="demo-h">${esc(cap)}</div>
-            <div class="demo-sub">Spend distribution by age and gender · L30D · weighted avg · ${esc(slide.campaigns || "")} campaigns</div>
+            <div class="demo-sub">${src}</div>
           </div>
-          <span class="demo-manual">manually entered${slide.updated ? " · " + esc(slide.updated) : ""}</span>
+          <span class="demo-manual">from workbook${slide.updated ? " · " + esc(slide.updated) : ""}</span>
         </div>
         <div class="demo-callouts">
-          <div class="demo-co"><div class="dc-lbl">Highest spend age group</div><div class="dc-big">${esc(slide.highest ? slide.highest.b : "—")}</div><div class="dc-sub">${slide.highest ? esc(slide.highest.pct) + "% · " + esc(slide.highest.usd) : ""}</div></div>
-          <div class="demo-co"><div class="dc-lbl">Lowest spend age group</div><div class="dc-big">${esc(slide.lowest ? slide.lowest.b : "—")}</div><div class="dc-sub">${slide.lowest ? esc(slide.lowest.pct) + "% · " + esc(slide.lowest.usd) : ""}</div></div>
+          <div class="demo-co"><div class="dc-lbl">Top-converting age group</div><div class="dc-big">${esc(slide.highest ? slide.highest.b : "—")}</div><div class="dc-sub">${slide.highest ? esc(slide.highest.pct) + "% of best-segment purchases" : ""}</div></div>
+          <div class="demo-co"><div class="dc-lbl">Dominant gender</div><div class="dc-big">${esc(slide.top_gender ? slide.top_gender.b : "—")}</div><div class="dc-sub">${slide.top_gender ? esc(slide.top_gender.pct) + "% of purchases" : ""}</div></div>
         </div>
         <div class="demo-charts">
-          <div class="demo-chart"><div class="dch-h">Spend % by Age Group</div><div class="dch-wrap"><canvas id="cv-age-${esc(slide.id)}"></canvas></div></div>
-          <div class="demo-chart"><div class="dch-h">Spend % by Gender</div><div class="dch-wrap"><canvas id="cv-gen-${esc(slide.id)}"></canvas></div></div>
+          <div class="demo-chart"><div class="dch-h">Purchases % by Age Group</div><div class="dch-wrap"><canvas id="cv-age-${esc(slide.id)}"></canvas></div></div>
+          <div class="demo-chart"><div class="dch-h">Purchases % by Gender</div><div class="dch-wrap"><canvas id="cv-gen-${esc(slide.id)}"></canvas></div></div>
         </div>
       </div>`;
   }
@@ -187,20 +206,15 @@
       return inner + `<div class="s-page">${index + 1} / ${total}</div>`;
     },
     mount(slide) {
-      if (slide.section !== "demographics" || !slide.available) return;
+      if (slide.section !== "demographics" || slide.view !== "chart" || !slide.available) return;
       const ageEl = document.getElementById("cv-age-" + slide.id);
       const genEl = document.getElementById("cv-gen-" + slide.id);
       if (ageEl && slide.age && slide.age.length) {
-        LEMCharts.bar(ageEl, slide.age.map(a => a.b), slide.age.map(a => a.pct), { pct: true, colors: "#d6457a" });
+        LEMCharts.bar(ageEl, slide.age.map(a => a.b), slide.age.map(a => a.pct || 0), { pct: true, colors: "#d6457a" });
       }
       if (genEl && slide.gender && slide.gender.length) {
-        const total = slide.gender.reduce((s, g) => s + (parseFloat(String(g.usd).replace(/[^0-9.]/g, "")) || 0), 0);
-        // gender stored as usd; show as % of total
-        const pcts = slide.gender.map(g => {
-          const v = parseFloat(String(g.usd).replace(/[^0-9.]/g, "")) || 0;
-          return total ? Math.round(1000 * v / total) / 10 : 0;
-        });
-        LEMCharts.bar(genEl, slide.gender.map(g => g.b), pcts, { pct: true, max: 100, colors: ["#d6457a", "#e8a13a"] });
+        const colors = slide.gender.map(g => (String(g.b).toLowerCase() === "male" ? "#e8a13a" : (String(g.b).toLowerCase() === "unknown" ? "#9d96b8" : "#d6457a")));
+        LEMCharts.bar(genEl, slide.gender.map(g => g.b), slide.gender.map(g => g.pct || 0), { pct: true, max: 100, colors });
       }
     },
   };

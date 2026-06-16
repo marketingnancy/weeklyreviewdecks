@@ -18,8 +18,8 @@
   --white:#ffffff;
   --stage-w:1280px;
   --stage-h:720px;
-  --serif:"Playfair Display",Georgia,serif;
-  --sans:"Inter",-apple-system,system-ui,sans-serif;
+  --serif:"Geist",-apple-system,system-ui,sans-serif;  /* single typeface (Geist), like the localization dashboard */
+  --sans:"Geist",-apple-system,system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#0e0a1c;font-family:var(--sans);color:var(--ink);overflow:hidden}
@@ -231,3 +231,43 @@ table.dectable .when{width:110px;color:var(--ink-soft)}
 .login-card button:hover{background:var(--accent)}
 .login-card button:disabled{opacity:.55;cursor:default}
 .login-err{color:var(--bad);font-size:12.5px;min-height:15px}
+
+/* ── refinements: single-font polish, compact tables, overview thumbnails ──── */
+.s-title{letter-spacing:-.02em}
+.goal-title{letter-spacing:-.025em}
+.gp-ebit,.dc-big{letter-spacing:-.02em}
+
+/* compact campaign tables so 7–15 rows never overflow */
+table.ctable{table-layout:fixed}
+table.ctable th:first-child,table.ctable td:first-child{width:32%}
+table.ctable th:last-child,table.ctable td:last-child{width:13%}
+table.ctable td{padding:5px 8px}
+table.ctable .cmp{font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-head{margin:2px 0 6px}
+.cmp-bucket{font-size:26px}
+.funnel-band{margin:12px 0 6px;padding:9px;font-size:16px}
+.act{padding:3px 8px;font-size:10.5px}
+
+/* demographics table (slides 16–17) */
+.demo-srcline{margin:10px 0 4px}
+table.demotable{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;margin-top:6px}
+table.demotable thead th{text-align:left;font-size:11px;color:var(--ink-soft);padding:7px 8px;
+  border-bottom:2px solid var(--plum);text-transform:uppercase;letter-spacing:.04em}
+table.demotable th:nth-child(3),table.demotable th:nth-child(4),table.demotable th:nth-child(6),
+table.demotable td:nth-child(3),table.demotable td:nth-child(4),table.demotable td:nth-child(6){text-align:center;width:9%}
+table.demotable td{padding:5px 8px;border-bottom:1px solid var(--line)}
+table.demotable .cmp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;color:var(--ink)}
+table.demotable .seg{font-weight:600;white-space:nowrap}
+table.demotable .seg.good{color:var(--good)}
+table.demotable .seg.bad{color:var(--bad)}
+table.demotable .num{text-align:center;font-variant-numeric:tabular-nums}
+
+/* ── all-slide overview: real scaled thumbnails ────────────────────────────── */
+#overview{grid-template-columns:repeat(4,1fr);gap:18px}
+.ov-card{aspect-ratio:auto;background:transparent;border:0;border-radius:0;display:flex;flex-direction:column;gap:6px}
+.ov-thumb{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:9px;
+  border:1px solid #2a2045;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.ov-card:hover .ov-thumb{border-color:var(--accent);box-shadow:0 6px 26px rgba(214,69,122,.35)}
+.ov-thumb .slide{transform-origin:top left;animation:none}
+.ov-cap{font-size:12px;color:#cfc7e6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+.ov-cap .ov-num{color:#8b84a6;font-variant-numeric:tabular-nums;margin-right:6px}
