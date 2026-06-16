@@ -20,13 +20,14 @@
   }
   async function _decB64(b64){ const buf=_b64buf(b64), iv=buf.slice(0,12), ct=buf.slice(12);
     return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv}, window.__KEY__, ct)); }
+  const _v = () => (window.__V__ ? "?v=" + window.__V__ : "");
   async function fetchDeck(){
-    if(window.__STATIC__){ const r=await fetch("data/deck.json"); const t=await r.text();
+    if(window.__STATIC__){ const r=await fetch("data/deck.json"+_v()); const t=await r.text();
       return window.__ENC__ ? JSON.parse(await _decB64(t)) : JSON.parse(t); }
     return (await fetch("/api/deck.json")).json();
   }
   async function showLogin(){
-    let cfg; try{ cfg=await (await fetch("data/enc.json")).json(); }catch(e){ return boot(); }
+    let cfg; try{ cfg=await (await fetch("data/enc.json"+_v())).json(); }catch(e){ return boot(); }
     const ov=document.createElement("div"); ov.className="login-ov";
     ov.innerHTML=`<form class="login-card" id="lform">
       <div class="login-brand">LEM</div><div class="login-sub">Weekly Review · sign in</div>
