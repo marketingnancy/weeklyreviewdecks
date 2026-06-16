@@ -10,13 +10,47 @@ async function getJSON(u){
     else if(p==="campaign_daily") f=`data/daily/${(q.get("campaign")||"").replace(/[^A-Za-z0-9]+/g,"_")}.json`;
     else if(p==="translation_segments") f=`data/seg_${q.get("page")}_${q.get("lang")}.json`;
     else f=`data/${p}.json`;
-    try{ const r=await fetch(f); return r.ok ? await r.json() : {}; }catch(e){ return {}; }
+    try{ const r=await fetch(f); if(!r.ok) return {};
+      return window.__ENC__ ? JSON.parse(await _decB64(await r.text())) : await r.json(); }catch(e){ return {}; }
   }
   const r = await fetch(u); return r.json();
 }
 async function postJSON(u, b){
   if(window.__STATIC__) return {ok:false, static:true};   // read-only on the published snapshot
   const r = await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}); return r.json();
+}
+/* ── published-snapshot password gate: data files are AES-256-GCM encrypted; the password
+   derives the decryption key (PBKDF2/Web Crypto), so the JSON is unreadable without it,
+   even at its direct URL. enc.json (salt + check token) is the only plaintext. ── */
+function _b64buf(b64){ const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i); return u; }
+async function _deriveKey(pw, salt, iter){
+  const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+}
+async function _decB64(b64){
+  const buf=_b64buf(b64), iv=buf.slice(0,12), ct=buf.slice(12);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv}, window.__KEY__, ct));
+}
+async function showLogin(){
+  let cfg; try{ cfg=await (await fetch("data/enc.json")).json(); }catch(e){ return init(); }
+  const ov=document.createElement("div"); ov.className="login-ov";
+  ov.innerHTML=`<form class="login-card" id="lform">
+    <div class="login-brand">Hello Nancy</div><div class="login-sub">Localization Daily · sign in</div>
+    <input id="luser" placeholder="Username" autocomplete="username" autocapitalize="off" autofocus>
+    <input id="lpass" type="password" placeholder="Password" autocomplete="current-password">
+    <button type="submit">Enter</button><div class="login-err" id="lerr"></div></form>`;
+  document.body.appendChild(ov);
+  ov.querySelector("#lform").onsubmit=async e=>{
+    e.preventDefault(); const err=ov.querySelector("#lerr"), btn=ov.querySelector("button"); err.textContent="";
+    const user=ov.querySelector("#luser").value.trim(), pw=ov.querySelector("#lpass").value;
+    btn.disabled=true; btn.textContent="Checking…";
+    try{
+      if(cfg.user && user.toLowerCase()!==String(cfg.user).toLowerCase()) throw 0;
+      window.__KEY__=await _deriveKey(pw, _b64buf(cfg.salt), cfg.iter);
+      if((await _decB64(cfg.check))!=="OK") throw 0;
+      ov.remove(); init();
+    }catch(_){ window.__KEY__=null; err.textContent="Wrong username or password."; btn.disabled=false; btn.textContent="Enter"; }
+  };
 }
 const usd = (v,dec=0)=> v==null ? "—" : "$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec});
 const num = v => Number(v).toLocaleString();
@@ -875,4 +909,4 @@ function renderSegments(view,sd){
   wrap.querySelectorAll(".seg-filter").forEach(b=>b.onclick=()=>{TQF=b.dataset.f; renderSegments(view,sd);});
 }
 
-init();
+if(window.__ENC__) showLogin(); else init();

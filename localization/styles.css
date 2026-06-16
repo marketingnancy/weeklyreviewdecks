@@ -421,3 +421,21 @@ table.tqheat td.tqcell{ text-align:center; cursor:pointer; padding:9px 10px; pos
 .oppnow li{ padding-left:2px; }
 .ib{ display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:999px; margin-right:6px; vertical-align:1px; }
 .ib.g{ background:var(--green-tint); color:var(--green); } .ib.r{ background:var(--red-tint); color:var(--red); } .ib.n{ background:var(--pink-soft); color:var(--pink-ink); }
+
+/* ── published-snapshot login gate ── */
+.login-ov{ position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(160deg,#ffffff 0%,#FBF6FE 100%); }
+.login-card{ width:340px; max-width:90vw; background:#fff; border:1px solid var(--line);
+  border-radius:18px; box-shadow:0 24px 70px rgba(20,16,30,.14); padding:36px 30px;
+  display:flex; flex-direction:column; gap:12px; }
+.login-brand{ font-weight:800; font-size:22px; letter-spacing:-.01em; }
+.login-brand::after{ content:" ·"; color:var(--pink); }
+.login-sub{ color:var(--mut); font-size:13px; margin-bottom:10px; }
+.login-card input{ border:1px solid var(--line); border-radius:10px; padding:11px 13px;
+  font-size:14px; font-family:inherit; outline:none; background:#fff; }
+.login-card input:focus{ border-color:var(--pink); }
+.login-card button{ margin-top:4px; background:var(--ink); color:#fff; border:0; border-radius:10px;
+  padding:12px; font-weight:600; font-size:14px; cursor:pointer; transition:background .15s; }
+.login-card button:hover{ background:var(--pink); }
+.login-card button:disabled{ opacity:.55; cursor:default; }
+.login-err{ color:var(--red); font-size:12.5px; min-height:15px; }
