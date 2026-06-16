@@ -122,7 +122,7 @@
         <div class="cc-body">
           <div class="cc-name" title="${esc(c.ad_name)}">${esc(c.ad_name)}</div>
           <div class="cc-cmp">${c.ads_manager_url ? `<a class="cmplink" href="${esc(c.ads_manager_url)}" target="_blank" rel="noopener" title="${esc(c.campaign)} — Ads Manager">${esc(c.campaign)}</a>` : esc(c.campaign)}</div>
-          <div class="cc-stats"><span class="cc-roas">ROAS ${typeof c.roas === "number" ? c.roas.toFixed(2) : esc(c.roas)}</span><span class="cc-pur">${esc(c.purchases)} purch</span></div>
+          <div class="cc-stats"><span class="cc-roas">ROAS ${typeof c.roas === "number" ? c.roas.toFixed(2) : esc(c.roas)}</span><span class="cc-pur">${esc(c.purchases)} purchases</span></div>
         </div>
       </div>`).join("");
     const empty = slide.cards.length ? "" : `<div class="empty">No ads meet the threshold yet.</div>`;
