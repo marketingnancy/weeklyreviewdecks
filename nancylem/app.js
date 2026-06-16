@@ -172,6 +172,9 @@
   document.getElementById("btn-overview").addEventListener("click", () => toggleOverview());
   window.addEventListener("resize", fitScale);
   window.addEventListener("keydown", e => {
+    // don't hijack typing in the sign-in form (or any input)
+    const t = e.target;
+    if ((t && t.matches && t.matches("input, textarea, select")) || document.querySelector(".login-ov")) return;
     if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); next(); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
     else if (e.key === "Home") go(0);

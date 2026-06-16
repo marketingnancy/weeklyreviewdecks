@@ -79,12 +79,13 @@ html,body{margin:0;height:100%;background:#0e0a1c;font-family:var(--sans);color:
   display:flex;align-items:center}
 .navzone-l{left:0;justify-content:flex-start;padding-left:22px}
 .navzone-r{right:0;justify-content:flex-end;padding-right:22px}
-.navzone::before{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;
-  background:rgba(26,19,50,.55);color:#fff;font-size:22px;line-height:1;opacity:0;transform:scale(.85);
-  transition:opacity .15s ease,transform .15s ease;backdrop-filter:blur(2px)}
+.navzone::before{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;
+  background:rgba(26,19,50,.6);color:#fff;font-size:24px;font-weight:600;line-height:1;opacity:.45;transform:scale(.92);
+  box-shadow:0 2px 10px rgba(0,0,0,.25);transition:opacity .15s ease,transform .15s ease;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 .navzone-l::before{content:"\2039"}   /* ‹ */
 .navzone-r::before{content:"\203A"}   /* › */
-.navzone:hover::before{opacity:1;transform:scale(1)}
+.navzone:hover::before{opacity:1;transform:scale(1.05)}
 .navzone:disabled{cursor:default}
 .navzone:disabled::before{display:none}
 
@@ -253,6 +254,8 @@ table.ctable th:first-child,table.ctable td:first-child{width:32%}
 table.ctable th:last-child,table.ctable td:last-child{width:13%}
 table.ctable td{padding:5px 8px}
 table.ctable .cmp{font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.ctable .cmplink{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--accent)}
+table.ctable .cmplink:hover{color:var(--accent)}
 .cmp-head{margin:2px 0 6px}
 .cmp-bucket{font-size:26px}
 .funnel-band{margin:12px 0 6px;padding:9px;font-size:16px}

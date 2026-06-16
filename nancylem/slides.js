@@ -68,8 +68,11 @@
     const rows = slide.rows.map(r => {
       const rs = r.roas_status || [];
       const cell = (v, i) => `<td class="num ${STATUS[rs[i]] || ""}">${typeof v === "number" ? v.toFixed(2) : esc(v)}</td>`;
+      const nameCell = r.ads_manager_url
+        ? `<a class="cmplink" href="${esc(r.ads_manager_url)}" target="_blank" rel="noopener" title="${esc(r.campaign_full || r.campaign)} — open in Ads Manager">${esc(r.campaign)}</a>`
+        : esc(r.campaign);
       return `<tr>
-        <td class="cmp">${esc(r.campaign)}</td>
+        <td class="cmp">${nameCell}</td>
         <td class="num">${esc(r.budget)}</td>
         ${cell(r.roas_l30d, 0)}${cell(r.roas_l7d, 1)}${cell(r.roas_yday, 2)}
         <td class="num">${esc(r.spend_l7d)}</td>
