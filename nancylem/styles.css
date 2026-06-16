@@ -254,8 +254,8 @@ table.ctable th:first-child,table.ctable td:first-child{width:32%}
 table.ctable th:last-child,table.ctable td:last-child{width:13%}
 table.ctable td{padding:5px 8px}
 table.ctable .cmp{font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-table.ctable .cmplink{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--accent)}
-table.ctable .cmplink:hover{color:var(--accent)}
+.cmplink{color:inherit;text-decoration:none;border-bottom:1px dotted var(--accent)}
+.cmplink:hover{color:var(--accent)}
 .cmp-head{margin:2px 0 6px}
 .cmp-bucket{font-size:26px}
 .funnel-band{margin:12px 0 6px;padding:9px;font-size:16px}

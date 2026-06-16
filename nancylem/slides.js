@@ -121,7 +121,7 @@
           <span class="cc-type">${esc(c.asset_type || "")}</span></div>
         <div class="cc-body">
           <div class="cc-name" title="${esc(c.ad_name)}">${esc(c.ad_name)}</div>
-          <div class="cc-cmp">${esc(c.campaign)}</div>
+          <div class="cc-cmp">${c.ads_manager_url ? `<a class="cmplink" href="${esc(c.ads_manager_url)}" target="_blank" rel="noopener" title="${esc(c.campaign)} — Ads Manager">${esc(c.campaign)}</a>` : esc(c.campaign)}</div>
           <div class="cc-stats"><span class="cc-roas">ROAS ${typeof c.roas === "number" ? c.roas.toFixed(2) : esc(c.roas)}</span><span class="cc-pur">${esc(c.purchases)} purch</span></div>
         </div>
       </div>`).join("");
@@ -145,7 +145,7 @@
     const src = `Best-converting age × gender per campaign · purchases · ${esc(slide.campaigns || "")} campaigns · source: ${esc(slide.source || "NANCY LEM.xlsx")}`;
     if (slide.view === "table") {
       const rows = slide.rows.map(r => `<tr>
-          <td class="cmp">${esc(r.campaign)}</td>
+          <td class="cmp">${r.ads_manager_url ? `<a class="cmplink" href="${esc(r.ads_manager_url)}" target="_blank" rel="noopener" title="${esc(r.campaign)} — Ads Manager">${esc(r.campaign)}</a>` : esc(r.campaign)}</td>
           <td class="seg good">${esc(r.best)}</td>
           <td class="num">${typeof r.best_roas === "number" ? r.best_roas.toFixed(2) : esc(r.best_roas)}</td>
           <td class="num">${esc(r.best_purch)}</td>
