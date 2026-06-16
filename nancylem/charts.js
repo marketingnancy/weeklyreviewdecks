@@ -1,6 +1,7 @@
 /* Themed Chart.js helpers (dark demographic panels). */
 window.LEMCharts = {
   bar(canvas, labels, values, opts) {
+    if (typeof Chart === "undefined") return null;   // tolerate Chart.js being unavailable
     opts = opts || {};
     return new Chart(canvas.getContext("2d"), {
       type: "bar",

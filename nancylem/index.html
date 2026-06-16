@@ -27,11 +27,13 @@
     } catch (e) {}
   })();
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="styles.css?v=ba3569b0">
+  <!-- Fonts load NON-blocking: if a network blocks Google Fonts, the page still renders
+       immediately in the system fallback (never blank). Geist applies once/if it loads. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap"></noscript>
+  <!-- Chart.js is self-hosted (no external CDN) so a firewall can't blank the deck. -->
+  <script src="vendor/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=df5955f4">
 </head>
 <body>
   <div id="app">
@@ -65,9 +67,9 @@
     <div id="banner" hidden></div>
   </div>
 
-  <script src="charts.js?v=ba3569b0"></script>
-  <script src="slides.js?v=ba3569b0"></script>
-  <script>window.__STATIC__=true;window.__ENC__=true;window.__V__="ba3569b0";</script>
-  <script src="app.js?v=ba3569b0"></script>
+  <script src="charts.js?v=df5955f4"></script>
+  <script src="slides.js?v=df5955f4"></script>
+  <script>window.__STATIC__=true;window.__ENC__=true;window.__V__="df5955f4";</script>
+  <script src="app.js?v=df5955f4"></script>
 </body>
 </html>
