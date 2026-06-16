@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>LEM Weekly Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="topbar">
+      <div class="tb-left">
+        <span class="tb-logo">LEM</span>
+        <span class="tb-sub">Weekly Review</span>
+      </div>
+      <div class="tb-right">
+        <a id="lnk-glued" class="tb-link" target="_blank" rel="noopener">Glued</a>
+        <a id="lnk-shop" class="tb-link" target="_blank" rel="noopener">Shopify</a>
+        <span id="updated" class="tb-updated"></span>
+        <button id="btn-refresh" class="tb-btn" title="Pull fresh data (r)">Refresh</button>
+        <button id="btn-overview" class="tb-btn" title="Overview (o)">▦</button>
+      </div>
+    </div>
+
+    <div id="viewport">
+      <div id="stage"><!-- current slide scaled here --></div>
+    </div>
+
+    <div id="nav">
+      <button id="prev" class="navzone navzone-l" aria-label="Previous"></button>
+      <button id="next" class="navzone navzone-r" aria-label="Next"></button>
+    </div>
+
+    <div id="progress"></div>
+    <div id="counter"></div>
+
+    <div id="overview" hidden></div>
+    <div id="banner" hidden></div>
+  </div>
+
+  <script src="charts.js"></script>
+  <script src="slides.js"></script>
+  <script>window.__STATIC__=true;window.__ENC__=true;</script>
+  <script src="app.js"></script>
+</body>
+</html>
