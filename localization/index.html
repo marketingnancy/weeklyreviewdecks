@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Localization Review — Hello Nancy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-row">
+        <img src="nancy-logo.png" alt="Nancy">
+        <button id="navcollapse" class="navcollapse" type="button" title="Collapse menu" aria-label="Collapse menu">
+          <svg viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5M19 7l-5 5 5 5"/></svg>
+        </button>
+      </div>
+      <div class="sub">Localization Review</div>
+    </div>
+    <nav id="nav" class="nav"></nav>
+    <div class="side-foot"><span class="live">Live</span> from <code>localization.db</code><br>auto-updates each snapshot</div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-l">
+        <button id="navtoggle" class="navtoggle" type="button" title="Show menu" aria-label="Show menu">
+          <svg viewBox="0 0 24 24"><path d="M10 7l5 5-5 5M5 7l5 5-5 5"/></svg>
+        </button>
+        <div class="pagetitle" id="pagetitle">—</div>
+      </div>
+      <div class="topbar-r">
+        <a id="shopsrc" class="srcbtn" target="_blank" rel="noopener noreferrer"
+           title="Open the source data in Shopify (session-country CR report) for the selected date">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          Shopify source <span class="ext">↗</span>
+        </a>
+        <a id="gluedsrc" class="srcbtn" target="_blank" rel="noopener noreferrer"
+           title="Open the Meta ad data source (spend · ROAS · campaigns) in Glued">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 16l9 5 9-5"/></svg>
+          Glued source <span class="ext">↗</span>
+        </a>
+        <div class="datefield">
+          <label for="date">Date</label>
+          <select id="date" aria-label="Report date"></select>
+        </div>
+      </div>
+    </header>
+    <main id="view" class="view"></main>
+  </div>
+</div>
+<script>window.__STATIC__=true;</script>
+<script src="app.js"></script>
+</body>
+</html>
