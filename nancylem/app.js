@@ -12,22 +12,32 @@
 
   function slideCount() { return state.deck ? state.deck.slides.length : 0; }
 
-  // ── static + encrypted-data support (published build) ───────────────────────
-  function _b64buf(b64){ const s=atob(b64),u=new Uint8Array(s.length); for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i); return u; }
-  async function _deriveKey(pw, salt, iter){
-    const base=await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations:iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  // ── static + scrambled-data support (published build) ───────────────────────
+  // Pure-JS scramble (NO Web Crypto / crypto.subtle), so it works in locked-down
+  // browsers where Web Crypto is unavailable. The build (web/lock.js) uses the
+  // identical cyrb53 + mulberry32 keystream. This is obfuscation, not strong crypto.
+  function _cyrb53(str, seed){ let h1=0xdeadbeef^seed, h2=0x41c6ce57^seed;
+    for(let i=0;i<str.length;i++){ const ch=str.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+    h1=Math.imul(h1^(h1>>>16),2246822507); h1^=Math.imul(h2^(h2>>>13),3266489909);
+    h2=Math.imul(h2^(h2>>>16),2246822507); h2^=Math.imul(h1^(h1>>>13),3266489909);
+    return 4294967296*(2097151&h2)+(h1>>>0); }
+  function _mb32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function _xorDec(b64, pw, salt){
+    const bin=atob(b64), bytes=new Uint8Array(bin.length);
+    const seed=((_cyrb53(salt+":"+pw,1)>>>0) ^ (_cyrb53(pw+":"+salt,2)>>>0))>>>0;
+    const r=_mb32(seed);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i) ^ (Math.floor(r()*256));
+    return new TextDecoder().decode(bytes);
   }
-  async function _decB64(b64){ const buf=_b64buf(b64), iv=buf.slice(0,12), ct=buf.slice(12);
-    return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv}, window.__KEY__, ct)); }
   const _v = () => (window.__V__ ? "?v=" + window.__V__ : "");
   async function fetchDeck(){
-    if(window.__STATIC__){ const r=await fetch("data/deck.json"+_v()); const t=await r.text();
-      return window.__ENC__ ? JSON.parse(await _decB64(t)) : JSON.parse(t); }
+    if(window.__STATIC__){ const t=await (await fetch("data/deck.json"+_v())).text();
+      return window.__ENC__ ? JSON.parse(_xorDec(t, window.__PW__, window.__SALT__)) : JSON.parse(t); }
     return (await fetch("/api/deck.json")).json();
   }
   async function showLogin(){
-    let cfg; try{ cfg=await (await fetch("data/enc.json"+_v())).json(); }catch(e){ return boot(); }
+    let cfg; try{ cfg=await (await fetch("data/enc.json"+_v())).json(); }
+    catch(e){ stage.innerHTML='<div class="loading">Could not load sign-in (data/enc.json). Check your connection.</div>'; return; }
     const ov=document.createElement("div"); ov.className="login-ov";
     ov.innerHTML=`<form class="login-card" id="lform">
       <div class="login-brand">LEM</div><div class="login-sub">Weekly Review · sign in</div>
@@ -35,16 +45,16 @@
       <input id="lpass" type="password" placeholder="Password" autocomplete="current-password">
       <button type="submit">Enter</button><div class="login-err" id="lerr"></div></form>`;
     document.body.appendChild(ov);
-    ov.querySelector("#lform").onsubmit=async e=>{
+    ov.querySelector("#lform").onsubmit=e=>{
       e.preventDefault(); const err=ov.querySelector("#lerr"), btn=ov.querySelector("button"); err.textContent="";
       const user=ov.querySelector("#luser").value.trim(), pw=ov.querySelector("#lpass").value;
       btn.disabled=true; btn.textContent="Checking…";
       try{
         if(cfg.user && user.toLowerCase()!==String(cfg.user).toLowerCase()) throw 0;
-        window.__KEY__=await _deriveKey(pw, _b64buf(cfg.salt), cfg.iter);
-        if((await _decB64(cfg.check))!=="OK") throw 0;
+        if(_xorDec(cfg.check, pw, cfg.salt)!=="OK") throw 0;
+        window.__PW__=pw; window.__SALT__=cfg.salt;
         ov.remove(); boot();
-      }catch(_){ window.__KEY__=null; err.textContent="Wrong username or password."; btn.disabled=false; btn.textContent="Enter"; }
+      }catch(_){ window.__PW__=null; err.textContent="Wrong username or password."; btn.disabled=false; btn.textContent="Enter"; }
     };
   }
 
@@ -77,6 +87,8 @@
     // progress dots
     progress.innerHTML = deck.slides.map((_, j) => `<span class="pdot${j <= state.i ? " on" : ""}"></span>`).join("");
     counter.textContent = `${state.i + 1} / ${slideCount()}`;
+    document.getElementById("prev").disabled = state.i === 0;
+    document.getElementById("next").disabled = state.i === slideCount() - 1;
     fitScale();
   }
 
