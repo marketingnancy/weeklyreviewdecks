@@ -235,7 +235,8 @@ table.dectable .when{width:110px;color:var(--ink-soft)}
 .login-brand::after{content:" ·";color:var(--accent)}
 .login-sub{color:var(--ink-soft);font-size:13px;margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase}
 .login-card input{border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14px;
-  font-family:inherit;outline:none;background:#fff}
+  font-family:inherit;outline:none;background:#fff;color:#1a1332;caret-color:#d6457a;color-scheme:light}
+.login-card input::placeholder{color:#9a93b0}
 .login-card input:focus{border-color:var(--accent)}
 .login-card button{margin-top:4px;background:var(--plum);color:#fff;border:0;border-radius:10px;
   padding:12px;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s}
