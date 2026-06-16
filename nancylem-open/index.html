@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <!-- the deck is already dark-themed; opt out of browser auto-dark / Dark Reader so they don't invert it -->
+  <meta name="color-scheme" content="dark light">
+  <meta name="darkreader-lock">
+  <title>LEM Weekly Review</title>
+  <script>
+  /* This deck is already dark-themed. Some dark-mode extensions ignore the opt-out
+     meta and inject their own stylesheets that invert our text to unreadable dark.
+     Strip those injected styles (and any root filter) and keep stripping them. */
+  (function () {
+    function purge() {
+      document.querySelectorAll(
+        'style.darkreader,style[class*="darkreader"],style[data-darkreader-mode],style#dark-mode-style,style[id*="dark-mode"]'
+      ).forEach(function (e) { e.remove(); });
+      var h = document.documentElement;
+      if (h.style.filter && /invert|brightness|hue/i.test(h.style.filter)) h.style.filter = "";
+      if (h.style.webkitFilter) h.style.webkitFilter = "";
+    }
+    purge();
+    try {
+      new MutationObserver(purge).observe(document.documentElement,
+        { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
+    } catch (e) {}
+  })();
+  </script>
+  <!-- Fonts load NON-blocking: if a network blocks Google Fonts, the page still renders
+       immediately in the system fallback (never blank). Geist applies once/if it loads. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap"></noscript>
+  <!-- Chart.js is self-hosted (no external CDN) so a firewall can't blank the deck. -->
+  <script src="vendor/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="styles.css?v=df5955f4">
+</head>
+<body>
+  <div id="app">
+    <div id="topbar">
+      <div class="tb-left">
+        <span class="tb-logo">LEM</span>
+        <span class="tb-sub">Weekly Review</span>
+      </div>
+      <div class="tb-right">
+        <a id="lnk-glued" class="tb-link" target="_blank" rel="noopener">Glued</a>
+        <a id="lnk-shop" class="tb-link" target="_blank" rel="noopener">Shopify</a>
+        <span id="updated" class="tb-updated"></span>
+        <button id="btn-refresh" class="tb-btn" title="Pull fresh data (r)">Refresh</button>
+        <button id="btn-overview" class="tb-btn" title="Overview (o)">▦</button>
+      </div>
+    </div>
+
+    <div id="viewport">
+      <div id="stage"><!-- current slide scaled here --></div>
+    </div>
+
+    <div id="nav">
+      <button id="prev" class="navzone navzone-l" aria-label="Previous"></button>
+      <button id="next" class="navzone navzone-r" aria-label="Next"></button>
+    </div>
+
+    <div id="progress"></div>
+    <div id="counter"></div>
+
+    <div id="overview" hidden></div>
+    <div id="banner" hidden></div>
+  </div>
+
+  <script src="charts.js?v=df5955f4"></script>
+  <script src="slides.js?v=df5955f4"></script>
+  <script>window.__STATIC__=true;window.__V__="df5955f4";</script>
+  <script src="app.js?v=df5955f4"></script>
+</body>
+</html>
