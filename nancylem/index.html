@@ -7,6 +7,26 @@
   <meta name="color-scheme" content="dark light">
   <meta name="darkreader-lock">
   <title>LEM Weekly Review</title>
+  <script>
+  /* This deck is already dark-themed. Some dark-mode extensions ignore the opt-out
+     meta and inject their own stylesheets that invert our text to unreadable dark.
+     Strip those injected styles (and any root filter) and keep stripping them. */
+  (function () {
+    function purge() {
+      document.querySelectorAll(
+        'style.darkreader,style[class*="darkreader"],style[data-darkreader-mode],style#dark-mode-style,style[id*="dark-mode"]'
+      ).forEach(function (e) { e.remove(); });
+      var h = document.documentElement;
+      if (h.style.filter && /invert|brightness|hue/i.test(h.style.filter)) h.style.filter = "";
+      if (h.style.webkitFilter) h.style.webkitFilter = "";
+    }
+    purge();
+    try {
+      new MutationObserver(purge).observe(document.documentElement,
+        { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
+    } catch (e) {}
+  })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
