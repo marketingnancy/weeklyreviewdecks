@@ -243,8 +243,8 @@ table.dectable .when{width:110px;color:var(--ink-soft)}
 .login-err{color:var(--bad);font-size:12.5px;min-height:15px}
 
 /* ── refinements: single-font polish, compact tables, overview thumbnails ──── */
-.s-title{letter-spacing:-.02em}
-.goal-title{letter-spacing:-.025em}
+.s-title{letter-spacing:-.02em;max-width:calc(100% - 250px)}  /* keep clear of the top-right data/owner meta */
+.goal-title{letter-spacing:-.025em;max-width:none}
 .gp-ebit,.dc-big{letter-spacing:-.02em}
 
 /* compact campaign tables so 7–15 rows never overflow */
