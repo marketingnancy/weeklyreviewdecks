@@ -4,9 +4,11 @@ Static dashboards & review decks for Hello Nancy marketing, published via **GitH
 **https://marketingnancy.github.io/weeklyreviewdecks/**.
 
 Each deck is a self-contained static bundle (HTML/CSS/JS + a baked data file). All business data is
-**AES-256-GCM encrypted behind a password** and decrypted client-side — the repo is public, but no
-revenue, ROAS, spend, or campaign data is readable without the login. Plaintext sources (CSVs, DBs,
-`.env`) live only in each deck's private source repo and are never published here.
+**encrypted/scrambled behind a password** and decrypted client-side — the repo is public, but no
+revenue, ROAS, spend, or campaign data is readable without the login. The scheme is per deck: the
+**localization** dashboard uses AES-256-GCM via Web Crypto; the **LEM** deck uses a pure-JS XOR keystream
+(no `crypto.subtle`) so it works in a locked-down "Work" browser. Plaintext sources (CSVs, DBs, `.env`)
+live only in each deck's private source repo and are never published here.
 
 ## Decks
 
@@ -28,13 +30,15 @@ into a sibling folder here:
 ```bash
 # in the deck's source repo (e.g. ~/Documents/lem-weekly-review)
 python3 -m app.build_static                                   # bake deck.json + copy the SPA
-DECK_PASSWORD='<password>' DECK_USER='nancy' node web/encrypt.js build_static   # encrypt the data
+# scramble the data — localization: web/encrypt.js (AES) · LEM: web/lock.js (XOR):
+DECK_PASSWORD='<password>' DECK_USER='nancy' node web/lock.js build_static
 # then copy build_static/* into weeklyreviewdecks/<deck>/ , commit, and push
 ```
 
-The encrypt step writes `data/enc.json` (salt + a check token, the only plaintext) and turns every
-`data/*.json` into `base64(iv|ciphertext|tag)`. The deck's `app.js` shows a login form, derives the
-key via PBKDF2/Web Crypto, and decrypts in the browser.
+The scramble step writes `data/enc.json` (salt + a check token, the only plaintext) and turns every
+`data/*.json` into base64 ciphertext. The deck's `app.js` shows a login form and decrypts in the browser
+— the localization dashboard via PBKDF2 + AES-256-GCM (Web Crypto), the LEM deck via a pure-JS XOR
+keystream (cyrb53 + mulberry32, `mode:"xor"` in `enc.json`) so it works where `crypto.subtle` is blocked.
 
 ## Adding a new deck
 
