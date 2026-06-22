@@ -60,7 +60,7 @@
         <thead><tr><th class="metric">LEM METRIC</th>${cols}<th class="tgt">TARGET</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      <div class="s-foot-note">Currency in USD · ROAS = Meta attributed</div>`;
+      <div class="s-foot-note">Currency in USD · Revenue, Purchases &amp; ROAS = Meta attributed (Glued) · Repeat/NC % = Shopify all-channel customers</div>`;
   }
 
   // ── slides 3–9: campaign tables ───────────────────────────────────────────
