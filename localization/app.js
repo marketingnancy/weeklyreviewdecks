@@ -398,7 +398,8 @@ function hRenderOpt(root){
   const LB={action:"Action",roas:"ROAS",spend_usd:"Spend 7d",campaign:"Campaign",ad_name:"Ad",adset:"Ad set",countries:"Countries"};
   const thead=$("#opttbl thead",root), tbody=$("#opttbl tbody",root); thead.innerHTML=""; tbody.innerHTML="";
   const tr=document.createElement("tr"); cols.forEach(c=>{ const th=document.createElement("th"); th.className=(c==="roas"||c==="spend_usd")?"num":""; th.textContent=LB[c]; tr.appendChild(th); }); thead.appendChild(tr);
-  if(!rows.length){ tbody.innerHTML=`<tr><td class="empty" colspan="${cols.length}">No scale/cut ${tab} for ${S.date}.</td></tr>`; return; }
+  const tabLbl={ads:"ads",adsets:"Super CBO ad sets",abo_adsets:"ABO ad sets"}[tab]||tab;
+  if(!rows.length){ tbody.innerHTML=`<tr><td class="empty" colspan="${cols.length}">No scale/cut ${tabLbl} for ${S.date}.</td></tr>`; return; }
   rows.forEach(r=>{ const trr=document.createElement("tr");
     cols.forEach(c=>{ const td=document.createElement("td");
       if(c==="action") td.innerHTML=`<span class="badge ${r.action==='Scale'?'b-scale':'b-kill'}">${r.action}</span>`;
@@ -413,7 +414,7 @@ function hRenderOpt(root){
     tbody.appendChild(trr); });
 }
 function hOptTabs(root){ const t=$("#opttabs",root); t.innerHTML="";
-  [["campaigns","Campaigns"],["ads","Ads"],["adsets","Super CBO ad sets"]].forEach(([k,lbl])=>{
+  [["campaigns","Campaigns"],["ads","Ads"],["adsets","Super CBO ad sets"],["abo_adsets","ABO ad sets"]].forEach(([k,lbl])=>{
     const b=document.createElement("button"); b.className="tab"; b.setAttribute("aria-selected",String(k===HO.tab));
     b.textContent=lbl+(HO.data?` (${HO.data[k].length})`:""); b.onclick=()=>{ HO.tab=k; hOptTabs(root); hRenderOpt(root); }; t.appendChild(b); }); }
 async function hLoadOpt(root){ HO.data=await getJSON(`/api/optimization?date=${S.date}`); hOptTabs(root); hRenderOpt(root); }
