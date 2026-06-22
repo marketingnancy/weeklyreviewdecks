@@ -14,7 +14,7 @@ window.LEMCharts = {
         responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
         plugins: { legend: { display: false }, tooltip: { enabled: true } },
         scales: {
-          x: { ticks: { color: "#cfc7e6", font: { size: 12 } }, grid: { display: false }, border: { display: false } },
+          x: { ticks: { color: "#cfc7e6", font: { size: 12 }, callback: function(val) { const lbl = this.getLabelForValue(val); return Array.isArray(lbl) ? lbl : lbl; } }, grid: { display: false }, border: { display: false } },
           y: { beginAtZero: true, max: opts.max,
                ticks: { color: "#8b84a6", font: { size: 11 }, callback: v => opts.pct ? v + "%" : v },
                grid: { color: "rgba(255,255,255,.07)" }, border: { display: false } },
