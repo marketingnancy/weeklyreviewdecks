@@ -177,6 +177,7 @@ async function getTrend30(){
   _trend30={date:S.date, series:d.series||[]}; return _trend30.series;
 }
 function kpiField(label){ const l=(label||"").toLowerCase();
+  if(l.includes("meta revenue")||l.includes("meta-attributed")||l.includes("attributed revenue")) return {f:"meta_rev_usd",fmt:"usd"};
   if(l.includes("revenue")) return {f:"revenue_usd",fmt:"usd"};
   if(l.includes("roas")) return {f:"meta_roas",fmt:"x"};
   if(l.includes("spend")) return {f:"meta_spend_usd",fmt:"usd"};
@@ -471,7 +472,7 @@ async function renderScorecard(view){
   const P=l=>d.progress.find(p=>p.label.toLowerCase().includes(l))||{pct:0};
   const _rev=K("revenue"),_roas=K("roas"),_mk=K("market");
   const goalP=((_mk.label||"").match(/(\d+)%/)||[])[1]||6;
-  const scRead=`Localized revenue is averaging <b>${usd(_rev.value)} a day</b>, about ${P("revenue").pct}% of the ${usd(_rev.target)} goal, at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${Number(_roas.target).toFixed(1)} target. Only <b>${_mk.value} of ${_mk.den}</b> markets are clearing ${goalP}% conversion, and spend is sitting at roughly ${P("spend").pct}% of target. The constraint right now is conversion, not budget.`;
+  const scRead=`Shopify revenue is averaging <b>${usd(_rev.value)} a day</b>, about ${P("revenue").pct}% of the ${usd(_rev.target)} goal, at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${Number(_roas.target).toFixed(1)} target. Only <b>${_mk.value} of ${_mk.den}</b> markets are clearing ${goalP}% conversion, and spend is sitting at roughly ${P("spend").pct}% of target. The constraint right now is conversion, not budget.`;
   view.innerHTML=`<div class="sec">Where we are · vs BETTER target</div>
     ${insightCard(scRead)}
     <div class="sub-note">30-day daily averages · Δ = week-over-week (last 7d vs prior 7d) · ${SD.g} at target · ${SD.a} close · ${SD.r} below</div>
@@ -518,12 +519,13 @@ async function renderTrends(view){
     <div class="sub-note">Localized markets · daily values with a <b>7-day moving average</b> (bold line) to cut noise · Δ = last 7 days vs prior 7</div>
     <div class="tstats">
       ${stat("Avg revenue / day", usd(Math.round(avg(rev.slice(-7)))), d7(rev))}
+      ${stat("Avg Meta revenue / day", usd(Math.round(avg(mrev.slice(-7)))), d7(mrev))}
       ${stat("Avg Meta spend / day", usd(Math.round(avg(spend.slice(-7)))), d7(spend))}
       ${stat("Avg Meta ROAS", avg(roas.slice(-7)).toFixed(2), d7(roas))}
       ${stat("30-day revenue", usd(rev.reduce((a,b)=>a+b,0)), null)}
     </div>
     <div class="sm-grid">
-      <div class="sm-card wide"><div class="sm-h"><span class="sm-t">Localized revenue / day</span><span class="sm-cur">latest ${usd(last(rev))}</span></div><div class="sm-box"><canvas id="tc_rev"></canvas></div></div>
+      <div class="sm-card wide"><div class="sm-h"><span class="sm-t">Shopify revenue / day</span><span class="sm-cur">latest ${usd(last(rev))}</span></div><div class="sm-box"><canvas id="tc_rev"></canvas></div></div>
       <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta spend vs attributed revenue / day</span><span class="sm-cur">ROAS ${last(roas).toFixed(2)}</span></div><div class="sm-box"><canvas id="tc_spend"></canvas></div></div>
       <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta ROAS / day</span><span class="sm-cur">goal ${(d.roas_goal||1.7)} · kill ${(d.roas_kill||1.1)}</span></div><div class="sm-box"><canvas id="tc_roas"></canvas></div></div>
     </div>`;
