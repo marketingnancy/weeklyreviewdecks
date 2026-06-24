@@ -166,6 +166,7 @@ tbody tr.lose td{ background:rgba(239,68,68,.05); }
 tbody tr.off td{ background:rgba(0,0,0,.022); }
 tbody tr.off td.txt a{ color:var(--mut); }
 .offpill{ display:inline-block; font:600 9px var(--mono); text-transform:uppercase; letter-spacing:.05em; color:var(--mut); background:var(--line); border-radius:5px; padding:1px 5px; margin-left:5px; vertical-align:middle; }
+.onpill{ display:inline-block; font:600 9px var(--mono); text-transform:uppercase; letter-spacing:.05em; color:#1a7f4b; background:#e3f6ec; border-radius:5px; padding:1px 5px; margin-left:5px; vertical-align:middle; }
 tbody tr:hover td{ background:var(--pink-soft); }
 tbody td.g{ color:var(--green); font-weight:700; } tbody td.r{ color:var(--red); font-weight:700; }
 tbody td.a{ color:var(--amber); font-weight:700; } tbody td.zero{ color:var(--mut2); }

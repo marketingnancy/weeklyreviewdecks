@@ -759,7 +759,7 @@ function cpAdsets(box,d,rows0,which){
   const COLS=[["label","Ad set"],["countries","Countries"],["budget_usd","Budget"],["spend_usd","Spend 7d"],["revenue_usd","Revenue 7d"],["roas","ROAS"],["impressions","Impressions"]];
   const rows=cpSort(rows0,"label");
   const cell=(r,c)=>{
-    if(c==="label") return `<td class="txt">${r.label}</td>`;
+    if(c==="label") return `<td class="txt">${r.label}${r.delivery==='inactive'?' <span class="offpill">inactive</span>':r.delivery==='active'?' <span class="onpill">active</span>':''}</td>`;
     if(c==="countries") return `<td class="txt sub">${r.countries||'—'}</td>`;
     if(c==="budget_usd") return `<td class="num">${r.budget_usd==null?'—':usd(r.budget_usd)}</td>`;
     if(c==="spend_usd") return `<td class="num">${usd(r.spend_usd)}</td>`;
