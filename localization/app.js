@@ -784,17 +784,19 @@ function cpAdsets(box,d,rows0,which){
 /* ═══════════════════════ CREATIVE ═══════════════════════ */
 async function renderCreative(view){
   const d=await getJSON(`/api/creative?date=${S.date}`);
-  const top=d.ads[0], above=d.ads.filter(a=>a.roas>=1.7).length, below=d.ads.filter(a=>a.roas<=1.1).length;
-  const crRead=d.ads.length ? `The top creative by spend is <b>${(top.ad_name||'').slice(0,46)}</b> at <b>${top.roas.toFixed(2)}×</b> ROAS. Of <b>${d.ads.length}</b> live creatives, <b>${above}</b> are profitable (1.7× or better) and <b>${below}</b> are under 1.1×, so those are the ones to refresh or cut.` : `No creatives cleared the spend floor for ${S.date}.`;
+  const top=d.ads[0];
+  const crRead = d.ads.length
+    ? `<b>${d.ads.length}</b> localized creative${d.ads.length!==1?'s':''} are running at <b>ROAS &ge; 2</b> over the last 7 days, ranked by purchases. The leader is <b>${(top.ad_name||'').slice(0,46)}</b> with <b>${top.purchases}</b> purchase${top.purchases!==1?'s':''} at <b>${top.roas.toFixed(2)}×</b> ROAS — the proven winners to scale.`
+    : `No localized creative is at ROAS &ge; 2 for ${S.date}.`;
   view.innerHTML=`<div class="sec">Top localized creatives — L7D</div>
     ${insightCard(crRead)}
-    <div class="sub-note">Ranked by 7-day spend (min spend floor). Ads of paused campaigns excluded.</div>
+    <div class="sub-note">Criteria: <b>ROAS &ge; 2</b> · ranked by most purchases · ads of paused campaigns excluded.</div>
     <div class="creative-grid">${d.ads.map(a=>`
       <div class="cre-card">
-        ${a.thumb?`<img class="cre-thumb" loading="lazy" src="${a.thumb}" alt="">`:`<div class="cre-noimg">no thumbnail<br>(stored on next snapshot)</div>`}
+        ${a.thumb?`<img class="cre-thumb" loading="lazy" src="${window.__STATIC__?a.thumb:('/api/thumb?u='+encodeURIComponent(a.thumb))}" alt="" onerror="this.closest('.cre-card').classList.add('noimg')">`:`<div class="cre-noimg">no thumbnail<br>(stored on next snapshot)</div>`}
         <div class="cre-body"><div class="cre-name" title="${a.ad_name}">${a.ad_name}</div>
-        <div class="cre-stats"><span class="${roasCls(a.roas)}">ROAS ${a.roas.toFixed(2)}</span> · ${usd(a.spend_usd)}</div></div>
-      </div>`).join("") || `<div class="empty">No creatives for ${S.date}.</div>`}</div>`;
+        <div class="cre-stats"><span class="${roasCls(a.roas)}">${a.roas.toFixed(2)}× ROAS</span> · <b>${a.purchases} purchase${a.purchases!==1?'s':''}</b> · ${usd(a.spend_usd)}</div></div>
+      </div>`).join("") || `<div class="empty">No creatives met the criteria for ${S.date}.</div>`}</div>`;
 }
 
 /* ═══════════════════════ THE PLAN ═══════════════════════ */
