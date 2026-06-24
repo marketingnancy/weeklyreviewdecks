@@ -10,7 +10,7 @@ async function getJSON(u){
     else if(p==="campaign_daily") f=`data/daily/${(q.get("campaign")||"").replace(/[^A-Za-z0-9]+/g,"_")}.json`;
     else if(p==="translation_segments") f=`data/seg_${q.get("page")}_${q.get("lang")}.json`;
     else f=`data/${p}.json`;
-    try{ const r=await fetch(f); if(!r.ok) return {};
+    try{ const r=await fetch(f+(window.__BUILD__?("?v="+window.__BUILD__):"")); if(!r.ok) return {};
       return window.__ENC__ ? JSON.parse(await _decB64(await r.text())) : await r.json(); }catch(e){ return {}; }
   }
   const r = await fetch(u); return r.json();
@@ -32,7 +32,7 @@ async function _decB64(b64){
   return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv}, window.__KEY__, ct));
 }
 async function showLogin(){
-  let cfg; try{ cfg=await (await fetch("data/enc.json")).json(); }catch(e){ return init(); }
+  let cfg; try{ cfg=await (await fetch("data/enc.json"+(window.__BUILD__?("?v="+window.__BUILD__):""))).json(); }catch(e){ return init(); }
   const ov=document.createElement("div"); ov.className="login-ov";
   ov.innerHTML=`<form class="login-card" id="lform">
     <div class="login-brand">Hello Nancy</div><div class="login-sub">Localization Daily · sign in</div>
@@ -704,7 +704,9 @@ async function renderCampaigns(view){
   view.innerHTML=`<div class="tabs" id="cptabs" role="tablist"></div><div id="cpview"></div>`;
   const tabs=[["all",`All campaigns (${d.campaigns.length})`],
               ["cbo",`Super CBO · ad sets (${d.cbo_adsets.length})`],
-              ["abo",`ABO · ad sets (${d.abo_adsets.length})`]];
+              ["abo_zenify",`Zenify ABO (${(d.abo_zenify||[]).length})`],
+              ["abo_website",`Website ABO (${(d.abo_website||[]).length})`],
+              ["abo_medusa",`Medusa ABO (${(d.abo_medusa||[]).length})`]];
   const tb=$("#cptabs",view);
   tabs.forEach(([k,l])=>{ const b=document.createElement("button"); b.className="tab"; b.setAttribute("aria-selected",String(k===CP.tab));
     b.textContent=l; b.onclick=()=>{ CP.tab=k; CP.sortCol="spend_usd"; CP.sortDir=-1;
@@ -713,7 +715,9 @@ async function renderCampaigns(view){
   cpBody(view,d);
 }
 function cpBody(view,d){ const box=$("#cpview",view);
-  if(CP.tab==="all") cpAll(box,d); else cpAdsets(box,d, CP.tab==="cbo"?d.cbo_adsets:d.abo_adsets, CP.tab); }
+  if(CP.tab==="all") return cpAll(box,d);
+  const map={cbo:d.cbo_adsets, abo_zenify:d.abo_zenify, abo_website:d.abo_website, abo_medusa:d.abo_medusa};
+  cpAdsets(box,d, map[CP.tab]||[], CP.tab); }
 function cpSort(rows,txtCol){ const sc=CP.sortCol,dir=CP.sortDir;
   const isStr = sc===txtCol || sc==="campaign" || sc==="started" || sc==="label" || sc==="countries";
   return rows.slice().sort((a,b)=> isStr ? ((a[sc]||"")<(b[sc]||"")?-dir:(a[sc]||"")>(b[sc]||"")?dir:0) : ((Number(a[sc])||0)-(Number(b[sc])||0))*dir); }
@@ -763,13 +767,14 @@ function cpAdsets(box,d,rows0,which){
     if(c==="roas") return r.spend_usd<1?`<td class="num zero">—</td>`:`<td class="num ${roasCls(r.roas)}">${r.roas.toFixed(2)}</td>`;
     return `<td class="num">${num(r.impressions)}</td>`;
   };
-  const body=rows.length?rows.map(r=>`<tr class="${cpRowCls(r,d,which==="abo")}">${COLS.map(([c])=>cell(r,c)).join("")}</tr>`).join("")
+  const isAbo=which!=="cbo";
+  const body=rows.length?rows.map(r=>`<tr class="${cpRowCls(r,d,isAbo)}">${COLS.map(([c])=>cell(r,c)).join("")}</tr>`).join("")
     :`<tr><td class="empty" colspan="7">No ad sets delivering on ${S.date}.</td></tr>`;
   const tSpend=rows.reduce((s,r)=>s+r.spend_usd,0), tRev=rows.reduce((s,r)=>s+r.revenue_usd,0), tImp=rows.reduce((s,r)=>s+(r.impressions||0),0), bRoas=tSpend?tRev/tSpend:0;
   const foot=rows.length?`<tr><td class="tot-label">Σ Blended</td><td class="num"></td><td class="num"></td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num">${num(tImp)}</td></tr>`:"";
-  const nm=which==="cbo"?"Super CBO":"ABO";
+  const nm={cbo:"Super CBO",abo_zenify:"Zenify ABO",abo_website:"Website ABO",abo_medusa:"Medusa ABO"}[which]||"ABO";
   const wins=rows0.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
-  const note=which==="abo"?" · newly launched Jun 2026 — ROAS still settling":" · CBO: budget self-allocates, so trim losers rather than scale";
+  const note=isAbo?" · newly launched Jun 2026 — ROAS still settling":" · CBO: budget self-allocates, so trim losers rather than scale";
   const read=`<b>${nm}</b> ran <b>${rows0.length}</b> language ad sets at a blended <b>${bRoas.toFixed(2)}×</b> over 7 days${wins.length?`. Best performer: <b>${wins[0].label}</b> at ${wins[0].roas.toFixed(2)}×`:''}.`;
   box.innerHTML=`${insightCard(read)}<div class="sub-note">L7D · per language ad set · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr}${note} · click headers to sort</div>
     <div class="tablewrap"><table id="cptbl"><thead><tr>${cpHead(COLS,"label")}</tr></thead><tbody>${body}</tbody>${foot?`<tfoot>${foot}</tfoot>`:''}</table></div>`;
