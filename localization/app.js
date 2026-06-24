@@ -576,7 +576,7 @@ function renderMarketsBody(view,d){
 }
 /* Tab 1 — sortable Top-15 with Orders, AOV, blended totals, n/a ROAS on $0 spend */
 function mkTop(box,d){
-  const COLS=[["market","Market"],["revenue_usd","Net sales 7d"],["spend_usd","Spend 7d"],["roas","ROAS"],["cr","CR"],["orders","Orders"],["aov","AOV"],["sessions","Sessions"]];
+  const COLS=[["market","Market"],["revenue_usd","Shopify Sales 7d"],["spend_usd","Meta Spend 7d"],["roas","Meta ROAS"],["cr","Shopify CR"],["orders","Orders"],["aov","AOV"],["sessions","Sessions"]];
   const rows=d.top.map(r=>({...r, aov:r.orders?r.revenue_usd/r.orders:0}));
   const sc=MK.sortCol, dir=MK.sortDir;
   rows.sort((a,b)=> sc==="market" ? (a.market<b.market?-dir:a.market>b.market?dir:0) : ((Number(a[sc])||0)-(Number(b[sc])||0))*dir);
@@ -594,14 +594,14 @@ function mkTop(box,d){
   const sum=k=>rows.reduce((s,r)=>s+(Number(r[k])||0),0);
   const tRev=sum("revenue_usd"),tSpend=sum("spend_usd"),tOrd=sum("orders"),tSess=sum("sessions"),tMrev=sum("meta_rev_usd");
   const bRoas=tSpend?tMrev/tSpend:0, bCr=tSess?rows.reduce((s,r)=>s+r.cr*r.sessions,0)/tSess:0, tAov=tOrd?tRev/tOrd:0;
-  const foot=`<tr><td class="tot-label">Σ Blended</td><td class="num">${usd(tRev)}</td><td class="num">${usd(tSpend)}</td>
+  const foot=`<tr><td class="tot-label">Σ Total (15)</td><td class="num">${usd(tRev)}</td><td class="num">${usd(tSpend)}</td>
     <td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num ${crCls(bCr)}">${bCr.toFixed(1)}%</td>
     <td class="num">${num(tOrd)}</td><td class="num">${usd(tAov)}</td><td class="num">${num(tSess)}</td></tr>`;
   const head=COLS.map(([c,l])=>{const on=sc===c; return `<th class="${c==='market'?'':'num'}" data-c="${c}" ${on?`aria-sort="${dir>0?'ascending':'descending'}"`:''}>${l}<span class="ar">${on?(dir>0?'▲':'▼'):''}</span></th>`;}).join("");
   const goal=d.goal_pct, leader=[...d.top].sort((a,b)=>b.revenue_usd-a.revenue_usd)[0];
   const eff=d.top.filter(r=>r.spend_usd>=1&&r.roas>=1.7).sort((a,b)=>b.roas-a.roas).slice(0,3).map(r=>r.market);
-  const topRead=`<b>${leader.market}</b> leads on revenue at <b>${usd(leader.revenue_usd)}</b>. Across the top 15, blended ROAS is <b>${bRoas.toFixed(2)}</b> and conversion is <b>${bCr.toFixed(1)}%</b>, ${bCr>=goal?`at or above the ${goal}% goal`:`still short of the ${goal}% goal`}${eff.length?`. The most efficient markets are ${eff.join(", ")}`:''}.`;
-  box.innerHTML=`${insightCard(topRead)}<div class="sub-note">L7D · net sales & CR from Shopify, spend & ROAS from Glued · click headers to sort · ROAS shown “—” where there's no ad spend</div>
+  const topRead=`<b>${leader.market}</b> leads on revenue at <b>${usd(leader.revenue_usd)}</b>. Across the top 15, blended Meta ROAS is <b>${bRoas.toFixed(2)}</b> and conversion is <b>${bCr.toFixed(1)}%</b>, ${bCr>=goal?`at or above the ${goal}% goal`:`still short of the ${goal}% goal`}${eff.length?`. The most efficient markets are ${eff.join(", ")}`:''}.`;
+  box.innerHTML=`${insightCard(topRead)}<div class="sub-note">L7D · <b>Shopify Sales</b> (all-channel), CR, Orders, AOV & Sessions are from Shopify · <b>Meta Spend</b> & <b>Meta ROAS</b> are from Glued (Meta-attributed only — so ROAS is Meta revenue ÷ Meta spend, not Shopify Sales ÷ spend) · click headers to sort · ROAS shown “—” where there's no ad spend</div>
     <div class="tablewrap"><table id="mktbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
   box.querySelectorAll("#mktbl thead th").forEach(th=>{ th.onclick=()=>{ const c=th.dataset.c;
     if(MK.sortCol===c) MK.sortDir*=-1; else {MK.sortCol=c; MK.sortDir=c==="market"?1:-1;} mkTop(box,d); }; });
