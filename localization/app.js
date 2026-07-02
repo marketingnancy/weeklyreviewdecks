@@ -9,6 +9,7 @@ async function getJSON(u){
     if(p==="table") f=`data/table_${q.get("name")||"country"}.json`;
     else if(p==="campaign_daily") f=`data/daily/${(q.get("campaign")||"").replace(/[^A-Za-z0-9]+/g,"_")}.json`;
     else if(p==="translation_segments") f=`data/seg_${q.get("page")}_${q.get("lang")}.json`;
+    else if(p==="scorecard" && q.get("window")==="day") f=`data/scorecard_day.json`;
     else f=`data/${p}.json`;
     try{ const r=await fetch(f+(window.__BUILD__?("?v="+window.__BUILD__):"")); if(!r.ok) return {};
       return window.__ENC__ ? JSON.parse(await _decB64(await r.text())) : await r.json(); }catch(e){ return {}; }
