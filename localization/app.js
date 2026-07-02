@@ -442,13 +442,13 @@ async function renderHome(view){
   $("#copybtn",view).onclick=async()=>{ const b=$("#copybtn",view); try{await navigator.clipboard.writeText(H.reportText||"");}catch(e){} b.textContent="Copied ✓"; b.classList.add("done"); setTimeout(()=>{b.textContent="Copy";b.classList.remove("done");},1400); };
   // tables/opt load fast; the report does a live Glued pull (Today ROAS) so let it fill in async
   hTabs(view); hLoadTable(view); hLoadOpt(view);
-  getJSON(`/api/scorecard?date=${S.date}`).then(d=>{ const el=$("#kstrip",view); if(el&&d.kpis) el.innerHTML=d.kpis.map(kpiCard).join(""); });
+  getJSON(`/api/scorecard?date=${S.date}&window=day`).then(d=>{ const el=$("#kstrip",view); if(el&&d.kpis) el.innerHTML=d.kpis.map(kpiCard).join(""); });
   getJSON(`/api/report?date=${S.date}`).then(j=>{ H.reportText=j.error?"":j.text; const el=$("#report",view); if(el) el.textContent=j.error?("Error: "+j.error):j.text; });
 }
 
 /* ═══════════════════════ SCORECARD ═══════════════════════ */
 async function renderScorecard(view){
-  const d=await getJSON(`/api/scorecard?date=${S.date}`);
+  const d=await getJSON(`/api/scorecard?date=${S.date}&window=day`);
   const PAL=["#FF00CF","#C800A2","#FF6FE0","#9B2D86","#FFA3EA","#7A1F6B","#E25BC9","#FFD0F4","#5C1450"];
   const fpv=p=> p.fmt==="usd"?usd(p.value): p.fmt==="x"?Number(p.value).toFixed(2): num(p.value);
   const fpt=p=> p.fmt==="usd"?usd(p.target): p.fmt==="x"?Number(p.target).toFixed(2): p.target;
@@ -468,14 +468,18 @@ async function renderScorecard(view){
              ["Reached checkout",num(_rc),"cart", f.sessions?(_rc/f.sessions*100).toFixed(1)+"% of sessions":null],
              ["Completed",num(f.checkouts),"target", _rc?(f.checkouts/_rc*100).toFixed(1)+"% of reached":null]];
   const funnelHtml=stg.map(([lab,val,ic,sub],i)=>`${i?`<div class="fn-arrow">→</div>`:""}<div class="fn-stage"><div class="fn-ic">${svg(ic)}</div><div class="fn-val">${val}</div><div class="fn-lab">${lab}</div>${sub?`<div class="fn-sub">${sub}</div>`:""}</div>`).join("");
+  // The read reflects yesterday (the single selected day), sourced from the KPI cards
+  // (d.kpis, which are single-day in window=day mode). The progress bars below stay
+  // 30-day — they're the "distance to target" view, where a single day is too noisy.
   const K=l=>d.kpis.find(k=>k.label.toLowerCase().includes(l))||{};
   const P=l=>d.progress.find(p=>p.label.toLowerCase().includes(l))||{pct:0};
-  const _rev=K("revenue"),_roas=K("roas"),_mk=K("market");
+  const pctOf=k=> (k&&k.target)?Math.round(k.value/k.target*100):0;
+  const _rev=K("shopify"),_roas=K("roas"),_mk=K("market"),_sp=K("spend");
   const goalP=((_mk.label||"").match(/(\d+)%/)||[])[1]||6;
-  const scRead=`Shopify revenue is averaging <b>${usd(_rev.value)} a day</b>, about ${P("revenue").pct}% of the ${usd(_rev.target)} goal, at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${Number(_roas.target).toFixed(1)} target. Only <b>${_mk.value} of ${_mk.den}</b> markets are clearing ${goalP}% conversion, and spend is sitting at roughly ${P("spend").pct}% of target. The constraint right now is conversion, not budget.`;
+  const scRead=`Shopify revenue came in at <b>${usd(_rev.value)} yesterday</b>, about ${pctOf(_rev)}% of the ${usd(_rev.target)} daily goal, at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${Number(_roas.target).toFixed(1)} target. Only <b>${_mk.value} of ${_mk.den}</b> markets cleared ${goalP}% conversion, and spend was roughly ${pctOf(_sp)}% of target. The constraint right now is conversion, not budget.`;
   view.innerHTML=`<div class="sec">Where we are · vs BETTER target</div>
     ${insightCard(scRead)}
-    <div class="sub-note">30-day daily averages · Δ = week-over-week (last 7d vs prior 7d) · ${SD.g} at target · ${SD.a} close · ${SD.r} below</div>
+    <div class="sub-note">KPI cards &amp; read show <b>${S.date}</b> (yesterday) · Δ = week-over-week (last 7d vs prior 7d) · click a card for the 30-day breakdown · progress bars are 30-day</div>
     <div class="kpis">${d.kpis.map((k,i)=>kpiCard(k,{spark:true,clickable:true,idx:i})).join("")}</div>
     <div class="sc-grid">
       <div class="panel"><h3 class="cardh">Progress to BETTER target</h3>${progRows}</div>
