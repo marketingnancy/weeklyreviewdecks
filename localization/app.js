@@ -2,6 +2,7 @@
 const $ = (s, r=document) => r.querySelector(s);
 const S = { date:null, dates:[], tableDates:{} };
 let _charts = [];
+let _deckKey = null;   // active slideshow keydown handler (removed on navigation)
 async function getJSON(u){
   if(window.__STATIC__){            // GitHub Pages static snapshot → read pre-baked JSON files
     const url=new URL(u, location.href), p=(url.pathname.split("/api/")[1]||""), q=url.searchParams;
@@ -285,6 +286,7 @@ function buildNav(){
 }
 async function route(){
   killCharts(); closeDrawer();
+  if(_deckKey){ document.removeEventListener("keydown",_deckKey); _deckKey=null; }
   const p=curPage();
   $("#pagetitle").innerHTML = svg(p.icon)+`<span>${p.label}</span>`;
   const ss=$("#shopsrc"); if(ss) ss.href=shopifySourceUrl(S.date);
@@ -448,61 +450,120 @@ async function renderHome(view){
 }
 
 /* ═══════════════════════ SCORECARD ═══════════════════════ */
+// Slide header (shared): eyebrow + title on the left, DATA THRU + owner pill on the right.
+function cmdHead(eyebrow,title,date,owner){
+  return `<div class="cmd-head">
+    <div>${eyebrow?`<div class="cmd-eyebrow">${eyebrow}</div>`:""}<h1 class="cmd-title">${title}</h1></div>
+    <div class="cmd-meta"><div class="cmd-thru">DATA THRU <b>${date}</b></div>
+      <div class="cmd-owner">OWNER: ${(owner||"").toUpperCase()}</div></div>
+  </div>`;
+}
+// Slide 1 — command scorecard table (Yesterday / L7D / L30D vs BETTER target).
+function slideScorecard(d){
+  const vcell=c=>{ const cls=c.good===true?"gc":c.good===false?"bc":""; return `<td class="num ${cls}">${c.v}</td>`; };
+  const body=(d.rows||[]).map(r=>`<tr>
+    <td class="mlab${r.indent?" ind":""}">${r.indent?"· ":""}${r.label}</td>
+    ${vcell(r.day)}${vcell(r.l7d)}${vcell(r.l30d)}
+    <td class="num tgt">${r.t_day}</td><td class="num tgt">${r.t_l7d}</td><td class="num tgt">${r.t_l30d}</td>
+  </tr>`).join("");
+  return `<div class="cmdsc">
+    ${cmdHead("LOCALIZATION · WHERE WE ARE + ARE WE IMPROVING","Localization Command Scorecard",d.date,d.owner)}
+    <div class="cmd-insight">${d.insight||""}</div>
+    <table class="cmd-tbl"><thead><tr>
+      <th class="mlab">LOCALIZATION METRIC</th>
+      <th class="num">YESTERDAY</th><th class="num">L7D</th><th class="num">L30D</th>
+      <th class="num tgt">YDAY BETTER</th><th class="num tgt">7D BETTER</th><th class="num tgt">30D BETTER</th>
+    </tr></thead><tbody>${body}</tbody></table>
+    <div class="cmd-foot"><span>Currency in USD</span><span>Timezone: HKT (${d.l7d_range} for L7D)</span></div>
+  </div>`;
+}
+// Slide 2 — what drove the sales yesterday (localized revenue drivers by bucket).
+function slideDrivers(d){
+  const body=(d.groups||[]).map(g=>`
+    <tr class="grp"><td colspan="5">${g.title}</td></tr>
+    ${g.rows.map(r=>`<tr>
+      <td class="mlab">${r.name}</td>
+      <td class="num">${r.budget}</td><td class="num">${r.spend}</td>
+      <td class="num">${r.revenue}</td><td class="num${r.good?" gc":""}">${r.roas}</td>
+    </tr>`).join("")}`).join("");
+  const empty=(d.groups||[]).length?"":`<tr><td class="mlab" colspan="5" style="color:var(--mut)">No localized ad spend on this day.</td></tr>`;
+  return `<div class="cmdsc">
+    ${cmdHead("","What drove the sales yesterday? ("+(d.day_label||"")+")",d.date,d.owner)}
+    <table class="cmd-tbl drv"><thead><tr>
+      <th class="mlab">Campaign</th><th class="num">Budget</th><th class="num">Yest Spend</th>
+      <th class="num">Yest Revenue</th><th class="num">Yest ROAS</th>
+    </tr></thead><tbody>${body}${empty}</tbody></table>
+    <div class="cmd-foot"><span>Currency in USD</span><span>Localized campaigns + Super-CBO ad sets</span></div>
+  </div>`;
+}
+// Slides 3+ — ABO ad-set detail, grouped by campaign. Keep each campaign WHOLE on a
+// slide (combining small campaigns when they fit under `cap`); only split a campaign
+// across slides if it alone exceeds a full slide — so no orphan (cont.) rows.
+function paginateAbo(campaigns, cap=13){
+  const slides=[]; let cur=[], n=0;
+  const flush=()=>{ if(cur.length) slides.push(cur); cur=[]; n=0; };
+  (campaigns||[]).forEach(c=>{
+    if(c.rows.length<=cap){
+      if(n>0 && n+c.rows.length>cap) flush();
+      cur.push({name:c.name, cont:false, rows:c.rows}); n+=c.rows.length;
+    }else{                                   // campaign bigger than a whole slide → split
+      if(n>0) flush();
+      for(let i=0;i<c.rows.length;i+=cap){
+        cur.push({name:c.name, cont:i>0, rows:c.rows.slice(i,i+cap)}); slides.push(cur); cur=[];
+      }
+      n=0;
+    }
+  });
+  flush();
+  return slides;
+}
+function slideAbo(sections, d, idx, total){
+  const ACT={scale:"Scale", keep:"Keep", cut:"Cut"};
+  const rcell=(v,good,bad)=>`<td class="num ${good?"gc":bad?"bc":""}">${v}</td>`;
+  const secHtml=sections.map(sec=>`
+    <div class="abo-camp">${sec.name}${sec.cont?' <span class="cont">(cont.)</span>':''}</div>
+    <table class="cmd-tbl abo"><thead><tr>
+      <th class="mlab">Ad set</th><th class="num">Budget</th>
+      <th class="num">L7D Spend</th><th class="num">L7D ROAS</th>
+      <th class="num">Yest Spend</th><th class="num">Yest ROAS</th>
+      <th class="num">L30D ROAS</th><th class="num">Action</th>
+    </tr></thead><tbody>${sec.rows.map(r=>`<tr>
+      <td class="mlab">${r.label}</td><td class="num">${r.budget}</td>
+      <td class="num">${r.l7_spend}</td>${rcell(r.l7_roas,r.l7_good,r.l7_bad)}
+      <td class="num">${r.y_spend}</td>${rcell(r.y_roas,r.y_good,r.y_bad)}
+      <td class="num">${r.l30_roas}</td>
+      <td class="num"><span class="act ${r.action}">${ACT[r.action]}</span></td>
+    </tr>`).join("")}</tbody></table>`).join("");
+  return `<div class="cmdsc">
+    ${cmdHead("LOCALIZATION · ABO CAMPAIGNS",`ABO Campaigns · ad sets${total>1?` (${idx}/${total})`:""}`,d.date,d.owner)}
+    <div class="abo-note">Target ROAS <b>${Number(d.target).toFixed(1)}</b> · action = L7D ROAS vs scale/cut · <span class="act scale">Scale</span> ≥${Number(d.target).toFixed(1)} · <span class="act cut">Cut</span> ≤1.1 · HKT (${d.l7d_range} for L7D)</div>
+    ${secHtml}
+  </div>`;
+}
 async function renderScorecard(view){
-  const d=await getJSON(`/api/scorecard?date=${S.date}&window=day`);
-  const PAL=["#FF00CF","#C800A2","#FF6FE0","#9B2D86","#FFA3EA","#7A1F6B","#E25BC9","#FFD0F4","#5C1450"];
-  const fpv=p=> p.fmt==="usd"?usd(p.value): p.fmt==="x"?Number(p.value).toFixed(2): num(p.value);
-  const fpt=p=> p.fmt==="usd"?usd(p.target): p.fmt==="x"?Number(p.target).toFixed(2): p.target;
-  // progress bars
-  const progRows=d.progress.map(p=>{ const pct=Math.max(0,p.pct), w=Math.min(100,pct), cls=pct>=100?"g":(pct>=75?"a":"r");
-    const right = p.fmt==="frac" ? `${p.value} <span class="of">/ ${p.target}</span>` : `${fpv(p)} <span class="of">/ ${fpt(p)}</span>`;
-    return `<div class="prog"><div class="prog-top"><span class="pl">${p.label}</span><span class="pv">${right}</span></div>
-      <div class="track"><div class="fill ${cls}" style="width:${w}%"></div></div>
-      <div class="ppct ${cls}">${pct}% to target</div></div>`; }).join("");
-  // revenue-by-market list
-  const mixList=d.revenue_mix.map((m,i)=>`<div class="mxrow"><span class="sw" style="background:${PAL[i%PAL.length]}"></span>
-    <span class="mxn">${m.market}</span><span class="mxp">${m.pct}%</span><span class="mxv">${usd(m.revenue_usd)}</span></div>`).join("");
-  // funnel — clean monotonic session funnel from session_country (sessions → reached → completed).
-  // Orders/revenue are billing_country (different attribution) so they're context in the sub-note, not bars.
-  const f=d.funnel, _rc=f.reached_checkout||0;
-  const stg=[["Sessions",num(f.sessions),"grid",null],
-             ["Reached checkout",num(_rc),"cart", f.sessions?(_rc/f.sessions*100).toFixed(1)+"% of sessions":null],
-             ["Completed",num(f.checkouts),"target", _rc?(f.checkouts/_rc*100).toFixed(1)+"% of reached":null]];
-  const funnelHtml=stg.map(([lab,val,ic,sub],i)=>`${i?`<div class="fn-arrow">→</div>`:""}<div class="fn-stage"><div class="fn-ic">${svg(ic)}</div><div class="fn-val">${val}</div><div class="fn-lab">${lab}</div>${sub?`<div class="fn-sub">${sub}</div>`:""}</div>`).join("");
-  // The read reflects yesterday (the single selected day), sourced from the KPI cards
-  // (d.kpis, which are single-day in window=day mode). The progress bars below stay
-  // 30-day — they're the "distance to target" view, where a single day is too noisy.
-  const K=l=>d.kpis.find(k=>k.label.toLowerCase().includes(l))||{};
-  const P=l=>d.progress.find(p=>p.label.toLowerCase().includes(l))||{pct:0};
-  const pctOf=k=> (k&&k.target)?Math.round(k.value/k.target*100):0;
-  const _rev=K("shopify"),_roas=K("roas"),_mk=K("market"),_sp=K("spend");
-  const goalP=((_mk.label||"").match(/(\d+)%/)||[])[1]||6;
-  const scRead=`Shopify revenue came in at <b>${usd(_rev.value)} yesterday</b>, about ${pctOf(_rev)}% of the ${usd(_rev.target)} daily goal, at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${Number(_roas.target).toFixed(1)} target. Only <b>${_mk.value} of ${_mk.den}</b> markets cleared ${goalP}% conversion, and spend was roughly ${pctOf(_sp)}% of target. The constraint right now is conversion, not budget.`;
-  view.innerHTML=`<div class="sec">Where we are · vs BETTER target</div>
-    ${insightCard(scRead)}
-    <div class="sub-note">KPI cards &amp; read show <b>${S.date}</b> (yesterday) · Δ = week-over-week (last 7d vs prior 7d) · click a card for the 30-day breakdown · progress bars are 30-day</div>
-    <div class="kpis">${d.kpis.map((k,i)=>kpiCard(k,{spark:true,clickable:true,idx:i})).join("")}</div>
-    <div class="sc-grid">
-      <div class="panel"><h3 class="cardh">Progress to BETTER target</h3>${progRows}</div>
-      <div class="panel"><h3 class="cardh">Localized revenue by market · L7D</h3>
-        <div class="mixwrap"><div class="donutwrap"><canvas id="revmix"></canvas></div><div class="mxlist">${mixList}</div></div></div>
+  const [t,dr,ab]=await Promise.all([getJSON(`/api/scorecard_table?date=${S.date}`),
+                                     getJSON(`/api/drivers?date=${S.date}`),
+                                     getJSON(`/api/abo?date=${S.date}`)]);
+  const slides=[slideScorecard(t), slideDrivers(dr)];
+  const aboPages=paginateAbo(ab.campaigns);
+  aboPages.forEach((sec,i)=>slides.push(slideAbo(sec, ab, i+1, aboPages.length)));
+  view.innerHTML=`<div class="deck">
+    <div class="slides">${slides.map((s,i)=>`<div class="slide${i?"":" on"}">${s}</div>`).join("")}</div>
+    <div class="deck-nav">
+      <button class="dk-btn" id="dk-prev" aria-label="Previous slide">‹</button>
+      <div class="dk-dots">${slides.map((_,i)=>`<span class="dk-dot${i?"":" on"}" data-i="${i}"></span>`).join("")}</div>
+      <span class="dk-count"><b>1</b> / ${slides.length}</span>
+      <button class="dk-btn" id="dk-next" aria-label="Next slide">›</button>
     </div>
-    <div class="sec">Localized funnel · last 7 days</div>
-    <div class="sub-note">All localized markets · <b>${f.cr}%</b> session→completed CR · ${num(f.orders)} orders · ${usd(f.revenue_usd)} revenue</div>
-    <div class="panel funnel">${funnelHtml}</div>`;
-  drawSparks(d.kpis);
-  view.querySelectorAll(".kpi.clickable").forEach(el=>el.onclick=()=>openKpiDrawer(d.kpis[+el.dataset.ki]));
-  const mixTotal=d.revenue_mix.reduce((a,m)=>a+(m.revenue_usd||0),0);
-  const donutCenter={id:"donutCenter",afterDraw(c){const{ctx,chartArea:a}=c; if(!a) return;
-    const cx=(a.left+a.right)/2, cy=(a.top+a.bottom)/2; ctx.save(); ctx.textAlign="center"; ctx.textBaseline="middle";
-    ctx.fillStyle="#8A8694"; ctx.font="700 8.5px 'Geist',sans-serif"; ctx.fillText("L7D TOTAL", cx, cy-10);
-    ctx.fillStyle="#15131A"; ctx.font="600 15px 'Geist',sans-serif"; ctx.fillText(usd(mixTotal), cx, cy+6); ctx.restore();}};
-  _charts.push(new Chart($("#revmix",view),{type:"doughnut",
-    data:{labels:d.revenue_mix.map(m=>m.market),datasets:[{data:d.revenue_mix.map(m=>m.revenue_usd),backgroundColor:PAL,borderWidth:2,borderColor:"#fff",hoverOffset:7,hoverBorderColor:"#fff"}]},
-    options:{cutout:"66%",maintainAspectRatio:false,layout:{padding:6},
-      plugins:{legend:{display:false},tooltip:{enabled:false,external:htmlTooltip,
-        callbacks:{title:i=>i[0].label, label:i=>`${usd(i.raw)} · ${d.revenue_mix[i.dataIndex].pct}%`}}}},
-    plugins:[donutCenter]}));
+  </div>`;
+  const els=view.querySelectorAll(".slide"), dots=view.querySelectorAll(".dk-dot"), N=slides.length;
+  let cur=0;
+  const show=i=>{ cur=(i+N)%N; els.forEach((el,j)=>el.classList.toggle("on",j===cur));
+    dots.forEach((el,j)=>el.classList.toggle("on",j===cur)); $(".dk-count b",view).textContent=cur+1; };
+  $("#dk-prev",view).onclick=()=>show(cur-1); $("#dk-next",view).onclick=()=>show(cur+1);
+  dots.forEach(el=>el.onclick=()=>show(+el.dataset.i));
+  _deckKey=e=>{ if(e.key==="ArrowLeft")show(cur-1); else if(e.key==="ArrowRight")show(cur+1); };
+  document.addEventListener("keydown",_deckKey);
 }
 
 /* ═══════════════════════ TRENDS ═══════════════════════ */
