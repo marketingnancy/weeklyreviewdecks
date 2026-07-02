@@ -38,20 +38,18 @@ async function showLogin(){
   const ov=document.createElement("div"); ov.className="login-ov";
   ov.innerHTML=`<form class="login-card" id="lform">
     <div class="login-brand">Hello Nancy</div><div class="login-sub">Localization Daily · sign in</div>
-    <input id="luser" placeholder="Username" autocomplete="username" autocapitalize="off" autofocus>
-    <input id="lpass" type="password" placeholder="Password" autocomplete="current-password">
+    <input id="lpass" type="password" placeholder="Password" autocomplete="current-password" autofocus>
     <button type="submit">Enter</button><div class="login-err" id="lerr"></div></form>`;
   document.body.appendChild(ov);
   ov.querySelector("#lform").onsubmit=async e=>{
     e.preventDefault(); const err=ov.querySelector("#lerr"), btn=ov.querySelector("button"); err.textContent="";
-    const user=ov.querySelector("#luser").value.trim(), pw=ov.querySelector("#lpass").value;
+    const pw=ov.querySelector("#lpass").value;
     btn.disabled=true; btn.textContent="Checking…";
     try{
-      if(cfg.user && user.toLowerCase()!==String(cfg.user).toLowerCase()) throw 0;
       window.__KEY__=await _deriveKey(pw, _b64buf(cfg.salt), cfg.iter);
       if((await _decB64(cfg.check))!=="OK") throw 0;
       ov.remove(); init();
-    }catch(_){ window.__KEY__=null; err.textContent="Wrong username or password."; btn.disabled=false; btn.textContent="Enter"; }
+    }catch(_){ window.__KEY__=null; err.textContent="Wrong password."; btn.disabled=false; btn.textContent="Enter"; }
   };
 }
 const usd = (v,dec=0)=> v==null ? "—" : "$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec});
