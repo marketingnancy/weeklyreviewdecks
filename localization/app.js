@@ -807,8 +807,9 @@ function cpAll(box,d){
   };
   const body=rows.map(r=>`<tr class="${r.off?'off':cpRowCls(r,d,/ABO/i.test(r.campaign))}">${COLS.map(([c])=>cell(r,c)).join("")}</tr>`).join("");
   const act=rows.filter(r=>!r.off);
+  const tBud=act.reduce((s,r)=>s+(r.budget_usd||0),0);
   const tSpend=act.reduce((s,r)=>s+r.spend_usd,0), tRev=act.reduce((s,r)=>s+r.revenue_usd,0), bRoas=tSpend?tRev/tSpend:0;
-  const foot=`<tr><td class="tot-label">Σ Active</td><td class="num"></td><td class="num">—</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num"></td><td class="num"></td></tr>`;
+  const foot=`<tr><td class="tot-label">Σ Active</td><td class="num"></td><td class="num">${tBud?usd(tBud):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num"></td><td class="num"></td></tr>`;
   const off=d.campaigns.filter(r=>r.off);
   const wins=act.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
   const read=`<b>${act.length}</b> active localized campaign${act.length!==1?'s':''} ran over the last 7 days at a blended <b>${bRoas.toFixed(2)}×</b>${off.length?`, plus <b>${off.length}</b> killed last week (${off.map(r=>r.campaign).join(", ")})`:''}. ${wins.length?`<b>${wins.length}</b> ${wins.length===1?'is':'are'} scaling (≥${d.scale_thr}×), led by <b>${wins[0].campaign}</b> at ${wins[0].roas.toFixed(2)}×`:`None clear the ${d.scale_thr}× scale line`}.`;
