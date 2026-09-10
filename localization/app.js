@@ -54,7 +54,15 @@ async function showLogin(){
 }
 const usd = (v,dec=0)=> v==null ? "—" : "$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:dec,maximumFractionDigits:dec});
 const num = v => Number(v).toLocaleString();
-const roasCls = v => v>=1.7?"g":(v<1.1?"r":"a");
+// Phase targets — overwritten from the API (scorecard/trend send phase + goals).
+const TGT={roas:1.8,kill:1.1,rev:50000,spend:12800,label:"Phase 1 \u00b7 floor"};
+function setTargets(d){ if(!d) return;
+  if(d.roas_goal) TGT.roas=d.roas_goal;
+  if(d.roas_kill) TGT.kill=d.roas_kill;
+  if(d.revenue_target) TGT.rev=d.revenue_target;
+  if(d.spend_target) TGT.spend=d.spend_target;
+  if(d.phase_label) TGT.label=d.phase_label; }
+const roasCls = v => v>=TGT.roas?"g":(v<TGT.kill?"r":"a");
 const crCls = v => v>=6?"g":(v>=4?"a":"r");
 const _MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtStart = iso => { if(!iso) return "—"; const p=String(iso).split("-").map(Number); return `${_MON[p[1]-1]} ${p[2]}, ${p[0]}`; };
@@ -173,7 +181,7 @@ function initNavToggle(){
 let _trend30={date:null,series:null}, _drawerChart=null;
 async function getTrend30(){
   if(_trend30.date===S.date && _trend30.series) return _trend30.series;
-  const d=await getJSON(`/api/trend?date=${S.date}&days=30`);
+  const d=await getJSON(`/api/trend?date=${S.date}&days=30`); setTargets(d);
   _trend30={date:S.date, series:d.series||[]}; return _trend30.series;
 }
 function kpiField(label){ const l=(label||"").toLowerCase();
@@ -314,14 +322,14 @@ const HOME_TABS = {country:"Countries", campaign:"Campaigns (localized)", super_
 const HOME_ORDER = ["country","campaign","super_cbo","abo"];
 const HOME_TBL = {country:"loc_daily_country", campaign:"loc_daily_campaign", super_cbo:"loc_daily_adset", abo:"loc_daily_adset"};
 let H = { tab:"country", data:null, sortCol:null, sortDir:1, reportText:"" };
-let HO = { tab:"campaigns", data:null };
+let HO = { data:null, text:"" };   // PPC optimization message payload + copy text
 
 function hfmt(col, v){
   if(v===null||v===undefined||v==="") return {t:"", cls:""};
   if(!H.data.numeric.includes(col)) return {t:String(v), cls:"txt"};
   const n=Number(v); let cls="num", t;
   if(col==="conversion_rate"){ cls+=n>=0.06?" g":(n>=0.04?" a":" r"); }
-  else if(col==="roas"||col==="meta_roas"){ cls+=n===0?" zero":(n>=1.7?" g":(n>=1.1?" a":" r")); }
+  else if(col==="roas"||col==="meta_roas"){ cls+=n===0?" zero":(n>=TGT.roas?" g":(n>=TGT.kill?" a":" r")); }
   if(col==="conversion_rate") t=(n*100).toFixed(2)+"%";
   else if(col==="roas"||col==="meta_roas") t=n.toFixed(2);
   else if(col.endsWith("_usd")||col.endsWith("_hkd")) t=n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -380,46 +388,25 @@ async function hLoadTable(root){
   if(H.tab==="abo") note+=" · ABO campaign launched Jun 2026 — ROAS still settling, not flagged for kill yet";
   $("#srcnote",root).textContent=note;
 }
-function hOptCampaigns(root,d){
-  const box=$("#optcamp",root); $(".optwrap",root).style.display="none"; box.style.display="block"; box.innerHTML="";
-  const rows=d.campaigns||[]; if(!rows.length){ box.innerHTML=`<div class="empty">No scale/kill campaigns for ${S.date}.</div>`; return; }
-  const money=v=>(v==null)?"—":"$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); const r2=v=>Number(v).toFixed(2);
-  [["Scale",SD.g+" SCALE ≥"+Number(d.scale_thr).toFixed(1)],["Kill",SD.r+" KILL ≤"+Number(d.kill_thr).toFixed(1)]].forEach(([act,hdr])=>{
-    const items=rows.filter(r=>r.action===act); if(!items.length) return;
-    const h=document.createElement("div"); h.className="optg"; h.innerHTML=hdr; box.appendChild(h);
-    items.forEach(r=>{ const c=document.createElement("div"); c.className="optcard";
-      c.innerHTML=`<div class="optname">・ ${campLink(r.campaign, r.ads_url)}</div><div class="optmeta">Budget: ${money(r.budget_usd)} | YSpend: ${money(r.yspend_usd)} | L7D: <b>${r2(r.l7d)}</b> | Yday: ${r2(r.yday)} | Today: ${r2(r.today)}</div>`;
-      box.appendChild(c); });
-  });
+/* PPC optimization message: the exact WhatsApp template, ready to copy.
+   Ad-set numbers are on the ad-account (PDT) day, one behind the HKT selector. */
+async function hLoadOpt(root){
+  // latest=1: always the newest ad-set day, so the moves are never stale
+  const d=await getJSON(`/api/opt_text?date=${S.date}&latest=1`);
+  HO.data=d; HO.text=d.text||"";
+  const pre=$("#opttext",root); if(pre) pre.textContent=d.error?("Error: "+d.error):(d.text||"");
+  const basis=$("#optbasis",root);
+  if(basis&&!d.error) basis.textContent=`ad-acct day ${d.ad_date} · L7D ${d.l7d_range}`;
+  const rules=$("#optrules",root);
+  if(rules&&!d.error&&d.rules){ const r=d.rules;
+    rules.innerHTML=`<b>Rules:</b> KILL if L7D &lt; ${r.kill_roas.toFixed(2)} AND Yest &lt; ${r.kill_roas.toFixed(2)}`
+      +` AND L7D spend &gt; HK$${Number(r.kill_min_spend).toLocaleString()}`
+      +` &nbsp;·&nbsp; SCALE if both ≥ ${r.scale_roas.toFixed(2)} → +${Math.round(r.scale_pct*100)}% on the HK$500 ladder`
+      +`<br><b>Guard:</b> a set that tripped the kill test but posted a day ≥ 1.80 in the last 4 is held, not cut`
+      +` (small sets earn in bursts, so one zero day is a reporting gap).`
+      +`<br><b>Note:</b> CBO ad sets carry no budget of their own, so they are never given a move;`
+      +` CBO campaigns are reviewed whole.`; }
 }
-function hRenderOpt(root){
-  const d=HO.data; if(!d) return; const tab=HO.tab;
-  if(tab==="campaigns"){ return hOptCampaigns(root,d); }
-  $("#optcamp",root).style.display="none"; $(".optwrap",root).style.display="";
-  const rows=d[tab]||[]; const cols=tab==="ads"?["action","roas","spend_usd","ad_name","campaign"]:["action","roas","spend_usd","adset","countries"];
-  const LB={action:"Action",roas:"ROAS",spend_usd:"Spend 7d",campaign:"Campaign",ad_name:"Ad",adset:"Ad set",countries:"Countries"};
-  const thead=$("#opttbl thead",root), tbody=$("#opttbl tbody",root); thead.innerHTML=""; tbody.innerHTML="";
-  const tr=document.createElement("tr"); cols.forEach(c=>{ const th=document.createElement("th"); th.className=(c==="roas"||c==="spend_usd")?"num":""; th.textContent=LB[c]; tr.appendChild(th); }); thead.appendChild(tr);
-  const tabLbl={ads:"ads",adsets:"Super CBO ad sets",abo_adsets:"ABO ad sets"}[tab]||tab;
-  if(!rows.length){ tbody.innerHTML=`<tr><td class="empty" colspan="${cols.length}">No scale/cut ${tabLbl} for ${S.date}.</td></tr>`; return; }
-  rows.forEach(r=>{ const trr=document.createElement("tr");
-    cols.forEach(c=>{ const td=document.createElement("td");
-      if(c==="action") td.innerHTML=`<span class="badge ${r.action==='Scale'?'b-scale':'b-kill'}">${r.action}</span>`;
-      else if(c==="roas"){ td.className="num "+roasCls(r.roas); td.textContent=Number(r.roas).toFixed(2); }
-      else if(c==="spend_usd"){ td.className="num"; td.textContent="$"+num(r.spend_usd); }
-      else if(c==="campaign"){ td.className="txt"; td.innerHTML=campLink(r.campaign, r.ads_url); td.title=r.campaign||""; }
-      else if(c==="ad_name" && r.ad_id){ td.className="txt copyad"; td.title="Click to copy Ad ID "+r.ad_id;
-        td.innerHTML=`<span class="adcell"><span class="adnm">${r.ad_name||""}</span><span class="copyic" aria-hidden="true">⧉</span></span>`;
-        td.onclick=()=>copyAdId(td, r.ad_id); }
-      else { td.className="txt"; td.textContent=r[c]||""; td.title=r[c]||""; }
-      trr.appendChild(td); });
-    tbody.appendChild(trr); });
-}
-function hOptTabs(root){ const t=$("#opttabs",root); t.innerHTML="";
-  [["campaigns","Campaigns"],["ads","Ads"],["adsets","Super CBO ad sets"],["abo_adsets","ABO ad sets"]].forEach(([k,lbl])=>{
-    const b=document.createElement("button"); b.className="tab"; b.setAttribute("aria-selected",String(k===HO.tab));
-    b.textContent=lbl+(HO.data?` (${HO.data[k].length})`:""); b.onclick=()=>{ HO.tab=k; hOptTabs(root); hRenderOpt(root); }; t.appendChild(b); }); }
-async function hLoadOpt(root){ HO.data=await getJSON(`/api/optimization?date=${S.date}`); hOptTabs(root); hRenderOpt(root); }
 async function renderHome(view){
   view.innerHTML=`<div class="kpis strip" id="kstrip"></div>
     <div class="grid">
@@ -434,16 +421,24 @@ async function renderHome(view){
       <div class="tablewrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
       <footer class="note" id="srcnote"></footer>
       <div class="opt" id="opt">
-        <div class="opt-head">OPTIMIZATION — L7D · scale or cut</div>
-        <div class="tabs" id="opttabs" role="tablist"></div>
-        <div id="optcamp" class="optcamp" style="display:none"></div>
-        <div class="tablewrap optwrap"><table id="opttbl"><thead></thead><tbody></tbody></table></div>
+        <div class="opt-bar">
+          <div class="opt-head">PPC OPTIMIZATION — ready to send</div>
+          <div class="opt-actions">
+            <span class="opt-basis" id="optbasis"></span>
+            <button id="optcopy" class="copybtn" type="button">Copy</button>
+          </div>
+        </div>
+        <pre id="opttext" class="opttext">Loading…</pre>
+        <div class="opt-rules" id="optrules"></div>
       </div>
     </section></div>`;
   $("#copybtn",view).onclick=async()=>{ const b=$("#copybtn",view); try{await navigator.clipboard.writeText(H.reportText||"");}catch(e){} b.textContent="Copied ✓"; b.classList.add("done"); setTimeout(()=>{b.textContent="Copy";b.classList.remove("done");},1400); };
+  $("#optcopy",view).onclick=async()=>{ const b=$("#optcopy",view); const t=HO.text||"";
+    try{ await navigator.clipboard.writeText(t); }catch(e){ fallbackCopy(t); }
+    b.textContent="Copied ✓"; b.classList.add("done"); setTimeout(()=>{b.textContent="Copy";b.classList.remove("done");},1400); };
   // tables/opt load fast; the report does a live Glued pull (Today ROAS) so let it fill in async
   hTabs(view); hLoadTable(view); hLoadOpt(view);
-  getJSON(`/api/scorecard?date=${S.date}&window=day`).then(d=>{ const el=$("#kstrip",view); if(el&&d.kpis) el.innerHTML=d.kpis.map(kpiCard).join(""); });
+  getJSON(`/api/scorecard?date=${S.date}&window=day`).then(d=>{ setTargets(d); const el=$("#kstrip",view); if(el&&d.kpis) el.innerHTML=d.kpis.map(kpiCard).join(""); });
   getJSON(`/api/report?date=${S.date}`).then(j=>{ H.reportText=j.error?"":j.text; const el=$("#report",view); if(el) el.textContent=j.error?("Error: "+j.error):j.text; });
 }
 
@@ -566,7 +561,7 @@ async function renderScorecard(view){
 
 /* ═══════════════════════ TRENDS ═══════════════════════ */
 async function renderTrends(view){
-  const d=await getJSON(`/api/trend?date=${S.date}&days=30`);
+  const d=await getJSON(`/api/trend?date=${S.date}&days=30`); setTargets(d);
   const s=d.series, labels=s.map(p=>p.date.slice(5));
   const rev=s.map(p=>p.revenue_usd), spend=s.map(p=>p.meta_spend_usd),
         mrev=s.map(p=>p.meta_rev_usd||0), roas=s.map(p=>p.meta_roas);
@@ -575,7 +570,7 @@ async function renderTrends(view){
   const d7=a=>{const l=avg(a.slice(-7)),p=avg(a.slice(-14,-7));return p?Math.round((l-p)/p*100):null;};
   const stat=(label,val,delta)=>{const dv=delta==null?"":`<span class="td ${delta>=0?'up':'down'}">${delta>=0?'▲':'▼'} ${Math.abs(delta)}%</span>`;
     return `<div class="tstat clickable" data-kpi="${label}"><div class="tl">${label}</div><div class="tvv">${val}${dv}</div></div>`;};
-  const dRev=d7(rev), dRoas=d7(roas), roas7=avg(roas.slice(-7)), goalR=d.roas_goal||1.7;
+  const dRev=d7(rev), dRoas=d7(roas), roas7=avg(roas.slice(-7)), goalR=d.roas_goal||TGT.roas;
   const dir=v=> v==null?"flat":(v>=0?`up ${v}%`:`down ${Math.abs(v)}%`);
   const trRead=`Revenue is <b>${dir(dRev)}</b> on the prior week and spend is <b>${dir(d7(spend))}</b>. The 7-day ROAS sits at <b>${roas7.toFixed(2)}</b>, ${roas7>=goalR?`above the ${goalR} scale line, so there's room to push spend`:`still under the ${goalR} scale line. Efficiency (conversion and creative) needs fixing before more budget goes in`}.`;
   view.innerHTML=`<div class="sec">30-day performance trend</div>
@@ -591,7 +586,7 @@ async function renderTrends(view){
     <div class="sm-grid">
       <div class="sm-card wide"><div class="sm-h"><span class="sm-t">Shopify revenue / day</span><span class="sm-cur">latest ${usd(last(rev))}</span></div><div class="sm-box"><canvas id="tc_rev"></canvas></div></div>
       <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta spend vs attributed revenue / day</span><span class="sm-cur">ROAS ${last(roas).toFixed(2)}</span></div><div class="sm-box"><canvas id="tc_spend"></canvas></div></div>
-      <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta ROAS / day</span><span class="sm-cur">goal ${(d.roas_goal||1.7)} · kill ${(d.roas_kill||1.1)}</span></div><div class="sm-box"><canvas id="tc_roas"></canvas></div></div>
+      <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta ROAS / day</span><span class="sm-cur">goal ${(d.roas_goal||TGT.roas)} · kill ${(d.roas_kill||TGT.kill)}</span></div><div class="sm-box"><canvas id="tc_roas"></canvas></div></div>
     </div>`;
   view.querySelectorAll(".tstat.clickable").forEach(el=>el.onclick=()=>openKpiDrawer({label:el.dataset.kpi}));
   const bx={grid:{display:false},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:8}};
@@ -608,7 +603,7 @@ async function renderTrends(view){
   ]},options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"top",labels:{usePointStyle:true,boxWidth:8,padding:12}}},scales:{x:bx,y:dollarY}}}));
   // ROAS — daily + 7d MA + goal/kill lines
   const roasGoals={id:"rg",afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{y}}=c;
-    [[d.roas_goal||1.7,"#16A34A","scale ≥"+(d.roas_goal||1.7)],[d.roas_kill||1.1,"#EF4444","kill ≤"+(d.roas_kill||1.1)]].forEach(([v,col,lbl])=>{
+    [[d.roas_goal||TGT.roas,"#16A34A","scale ≥"+(d.roas_goal||TGT.roas)],[d.roas_kill||TGT.kill,"#EF4444","kill ≤"+(d.roas_kill||TGT.kill)]].forEach(([v,col,lbl])=>{
       const yy=y.getPixelForValue(v); if(yy<a.top||yy>a.bottom) return;
       ctx.save();ctx.strokeStyle=col;ctx.setLineDash([5,4]);ctx.lineWidth=1.2;
       ctx.beginPath();ctx.moveTo(a.left,yy);ctx.lineTo(a.right,yy);ctx.stroke();ctx.setLineDash([]);
@@ -663,7 +658,7 @@ function mkTop(box,d){
     <td class="num">${num(tOrd)}</td><td class="num">${usd(tAov)}</td><td class="num">${num(tSess)}</td></tr>`;
   const head=COLS.map(([c,l])=>{const on=sc===c; return `<th class="${c==='market'?'':'num'}" data-c="${c}" ${on?`aria-sort="${dir>0?'ascending':'descending'}"`:''}>${l}<span class="ar">${on?(dir>0?'▲':'▼'):''}</span></th>`;}).join("");
   const goal=d.goal_pct, leader=[...d.top].sort((a,b)=>b.revenue_usd-a.revenue_usd)[0];
-  const eff=d.top.filter(r=>r.spend_usd>=1&&r.roas>=1.7).sort((a,b)=>b.roas-a.roas).slice(0,3).map(r=>r.market);
+  const eff=d.top.filter(r=>r.spend_usd>=1&&r.roas>=TGT.roas).sort((a,b)=>b.roas-a.roas).slice(0,3).map(r=>r.market);
   const topRead=`<b>${leader.market}</b> leads on revenue at <b>${usd(leader.revenue_usd)}</b>. Across the top 15, blended Meta ROAS is <b>${bRoas.toFixed(2)}</b> and conversion is <b>${bCr.toFixed(1)}%</b>, ${bCr>=goal?`at or above the ${goal}% goal`:`still short of the ${goal}% goal`}${eff.length?`. The most efficient markets are ${eff.join(", ")}`:''}.`;
   box.innerHTML=`${insightCard(topRead)}<div class="sub-note">L7D · <b>Shopify Sales</b> (all-channel), CR, Orders, AOV & Sessions are from Shopify · <b>Meta Spend</b> & <b>Meta ROAS</b> are from Glued (Meta-attributed only — so ROAS is Meta revenue ÷ Meta spend, not Shopify Sales ÷ spend) · click headers to sort · ROAS shown “—” where there's no ad spend</div>
     <div class="tablewrap"><table id="mktbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
@@ -714,13 +709,13 @@ function mkMVS(box,d){
 /* Tab 4 — Opportunity map: spend × CR bubble (size=sessions, color=ROAS) */
 function mkOpp(box,d,goal){
   const pts=(d.scatter||[]);
-  const colFor=r=> r.spend_usd<1?"#B9B4C2":(r.roas>=1.7?"#16A34A":(r.roas>=1.1?"#C9851A":"#EF4444"));
+  const colFor=r=> r.spend_usd<1?"#B9B4C2":(r.roas>=TGT.roas?"#16A34A":(r.roas>=TGT.kill?"#C9851A":"#EF4444"));
   const maxSess=Math.max(1,...pts.map(p=>p.sessions));
   const data=pts.map(r=>({x:r.spend_usd,y:r.cr,r:7+Math.sqrt(r.sessions/maxSess)*20}));
   const opps=pts.filter(r=>r.cr>=goal).sort((a,b)=>a.spend_usd-b.spend_usd);
   const list=opps.length? opps.map(r=>`<div class="opprow"><span class="om">${r.market}</span><span class="oc">${r.cr.toFixed(1)}%</span><span class="os">${usd(r.spend_usd)}</span><span class="oo">${num(r.sessions)} sess</span></div>`).join("") : `<div class="empty">No market clears ${goal}% CR yet.</div>`;
   // ── plain-language, data-driven read of the map (recomputed every day) ──
-  const SCALE=1.7, KILL=1.1, ws=pts.filter(r=>r.spend_usd>=1);
+  const SCALE=TGT.roas, KILL=TGT.kill, ws=pts.filter(r=>r.spend_usd>=1);
   const mk=r=>`<b>${r.market}</b>`, names=(a,n=3)=>a.slice(0,n).map(mk).join(", ");
   const scaleHere=pts.filter(r=>r.cr>=goal && r.spend_usd<700).sort((a,b)=>b.cr-a.cr);
   const proven=ws.filter(r=>r.roas>=SCALE && r.cr>=goal*0.6).sort((a,b)=>b.roas-a.roas);
@@ -732,7 +727,7 @@ function mkOpp(box,d,goal){
   if(leaking.length){const t=leaking[0];ins.push(`<li><span class="ib r">Fix first</span> ${names(leaking)} ${leaking.length>1?"are":"is"} spending real money below target. ${mk(t)} burned <b>${usd(t.spend_usd)}</b> at just <b>${t.cr.toFixed(1)}%</b> CR and <b>${t.roas.toFixed(2)}×</b> ROAS, so fix the page or creative before adding budget.</li>`);}
   if(untapped.length){ins.push(`<li><span class="ib n">Untapped</span> ${names(untapped)} convert well on almost no ad spend, so they're worth a small test campaign.</li>`);}
   if(!ins.length) ins.push(`<li>No standout signals today. Spend and conversion are broadly in line across markets.</li>`);
-  box.innerHTML=`<div class="sub-note">Each bubble = a market · x = 7-day spend · y = CR · size = sessions · color = ROAS (${SD.g} ≥1.7 ${SD.a} ≥1.1 ${SD.r} <1.1 ${SD.m} no spend) · <b>top-left = high CR + low spend = scale here</b></div>
+  box.innerHTML=`<div class="sub-note">Each bubble = a market · x = 7-day spend · y = CR · size = sessions · color = ROAS (${SD.g} ≥${TGT.roas} ${SD.a} ≥${TGT.kill} ${SD.r} <${TGT.kill} ${SD.m} no spend) · <b>top-left = high CR + low spend = scale here</b></div>
     <div class="opp-grid">
       <div class="chartbox" style="height:440px"><canvas id="oppc"></canvas></div>
       <div class="opp-right">
@@ -746,7 +741,7 @@ function mkOpp(box,d,goal){
         <li><b>Left → right = ad spend</b> over the last 7 days. Further right = you spent more.</li>
         <li><b>Bottom → top = conversion rate</b> (share of visitors who buy). Higher is better — the green dashed line is your <b>${goal}% goal</b>.</li>
         <li><b>Circle size = traffic</b> (sessions). Bigger circle = more visitors.</li>
-        <li><b>Circle color = ROAS</b> (dollars back per $1 spent): ${SD.g} profitable ≥1.7 · ${SD.a} ok ≥1.1 · ${SD.r} losing &lt;1.1 · ${SD.m} no ad spend.</li>
+        <li><b>Circle color = ROAS</b> (dollars back per $1 spent): ${SD.g} profitable ≥${TGT.roas} · ${SD.a} ok ≥${TGT.kill} · ${SD.r} losing &lt;${TGT.kill} · ${SD.m} no ad spend.</li>
         <li><b>Top-left is the sweet spot</b> — high conversion on low spend: it's working and you're barely paying, so scale it. Bottom-right = paying a lot for weak conversion = wasteful.</li>
       </ul></div>`;
   const goalLine={id:"og",afterDatasetsDraw(c){const{ctx,chartArea:a,scales:{y}}=c;const yy=y.getPixelForValue(goal);if(yy<a.top||yy>a.bottom)return;
@@ -866,17 +861,17 @@ async function renderCreative(view){
 
 /* ═══════════════════════ THE PLAN ═══════════════════════ */
 async function renderPlan(view){
-  const [notes,sd]=await Promise.all([getJSON("/api/notes"),getJSON(`/api/scorecard?date=${S.date}`)]);
+  const [notes,sd]=await Promise.all([getJSON("/api/notes"),getJSON(`/api/scorecard?date=${S.date}`)]); setTargets(sd);
   const K=l=>(sd.kpis||[]).find(k=>k.label.toLowerCase().includes(l))||{};
   const P=l=>(sd.progress||[]).find(p=>p.label.toLowerCase().includes(l))||{pct:0};
   const _rev=K("revenue"),_roas=K("roas"),_mk=K("market");
-  const planRead=`The localized business is <b>${P("revenue").pct}%</b> of the way to the $40k/day revenue goal, running at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a 1.7 target, with <b>${_mk.value} of ${_mk.den}</b> markets at 6% CR and spend at about <b>${P("spend").pct}%</b> of target. The plan follows from that: fix conversion first (moves 1 and 2), then scale the proven low-spend markets (move 3).`;
+  const planRead=`The localized business is <b>${P("revenue").pct}%</b> of the way to the $${(TGT.rev/1000).toFixed(0)}k/day ${TGT.label} revenue goal, running at <b>${Number(_roas.value).toFixed(2)} ROAS</b> against a ${TGT.roas} blended target, with <b>${_mk.value} of ${_mk.den}</b> markets at 6% CR and spend at about <b>${P("spend").pct}%</b> of target. The plan follows from that: fix conversion first (moves 1 and 2), then scale the proven low-spend markets (move 3).`;
   const moves=[["1","Translate Top 50 winning statics","Re-cut the proven LEM / Rose static winners natively for FR, DE, IT & ES."],
                ["2","Redo & QA the website + landing pages","Fix the half-translated stores & LPs holding CR below 6% in the big markets."],
                ["3","Launch high-CR / low-spend markets","Stand up dedicated campaigns where CR is high and spend is tiny (see Markets → opportunity)."]];
   view.innerHTML=`<div class="sec">The Goal & The Plan</div>
     ${insightCard(planRead,"Where things stand today")}
-    <div class="panel"><b>Goal:</b> every Top-15 market to 6% CR, then scale localized spend ~7× at ≥1.7 ROAS — taking localized revenue toward $40k/day (Better tier).</div>
+    <div class="panel"><b>Goal (${TGT.label}):</b> every Top-15 market to 6% CR, then scale localized spend toward $${(TGT.spend/1000).toFixed(1)}k/day at ≥${TGT.roas} blended ROAS — taking localized revenue to $${(TGT.rev/1000).toFixed(0)}k/day.</div>
     <div class="moves">${moves.map(([n,h,b])=>`<div class="move"><span class="n">${n}</span><h4>${h}</h4><div class="sub-note" style="margin:0">${b}</div></div>`).join("")}</div>
     <div class="sec">This week</div>
     <div class="plan-grid">

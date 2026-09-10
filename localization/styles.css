@@ -20,7 +20,7 @@ html,body{margin:0}
 body{ background:var(--canvas); color:var(--ink); font-family:var(--sans); font-size:14px; line-height:1.45;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; font-feature-settings:"cv01","ss03"; }
 /* tabular, unambiguous figures everywhere numbers matter */
-.kpi .val,.num,tbody td.num,tfoot td.num,pre#report,.optmeta,select#date{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum","cv01"; }
+.kpi .val,.num,tbody td.num,tfoot td.num,pre#report,pre.opttext,.optmeta,select#date{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum","cv01"; }
 .pink{color:var(--pink)}
 code{font-family:var(--mono); font-size:.92em; color:var(--mut)}
 a{color:inherit}
@@ -192,8 +192,20 @@ td.copyad:hover .copyic{ color:var(--pink-ink); }
 
 /* ── Optimization ── */
 .opt{ margin-top:34px; }
-.opt-head{ font-family:var(--serif); font-weight:600; font-size:16px; margin-bottom:12px; }
+.opt-head{ font-family:var(--serif); font-weight:600; font-size:16px; }
 .opt .tablewrap{ max-height:none; }
+/* PPC optimization message — send-ready text, mirrors the report column's copy UX */
+.opt-bar{ display:flex; align-items:center; justify-content:space-between; gap:16px;
+  border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:12px; flex-wrap:wrap; }
+.opt-actions{ display:flex; align-items:center; gap:12px; }
+.opt-basis{ font-family:var(--mono); font-size:11px; color:var(--mut); }
+pre.opttext{ font-family:var(--mono); font-size:12.5px; line-height:1.68; white-space:pre-wrap;
+  word-break:break-word; margin:0; color:var(--ink2); background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow-sm);
+  font-variant-numeric:tabular-nums; }
+.opt-rules{ font-family:var(--sans); font-size:11.5px; line-height:1.6; color:var(--mut); margin-top:10px; }
+.opt-rules b{ color:var(--ink2); font-weight:700; }
+@media (max-width:620px){ pre.opttext{ font-size:12px; padding:14px; } }
 .badge{ display:inline-block; font-size:10px; font-weight:800; padding:3px 10px; border-radius:999px; letter-spacing:.04em; text-transform:uppercase; }
 .b-scale{ background:var(--green-tint); color:var(--green); } .b-kill{ background:var(--red-tint); color:var(--red); }
 .optg{ font-family:var(--sans); font-weight:700; font-size:13px; margin:18px 0 8px; color:var(--ink); display:flex; align-items:center; gap:8px; }
