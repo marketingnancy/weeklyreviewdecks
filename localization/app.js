@@ -388,7 +388,7 @@ async function hLoadTable(root){
   H.data=await getJSON(`/api/table?name=${H.tab}&date=${S.date}`); hRenderTable(root);
   const dates=S.tableDates[H.tab]||[]; const span=dates.length?`${dates[dates.length-1]} → ${dates[0]}`:"no data";
   let note=launchMode(H.data)
-    ? `${launchLabel(H.data)} · one closed day only · new relaunch scope; no historical budget, delivery, or action status shown.`
+    ? `${launchLabel(H.data)} · one closed day only · new relaunch scope; current ad-set budgets verified from Oct 6 screenshots, no inherited pre-pause status or optimization action.`
     : `source: ${HOME_TBL[H.tab]} · available ${span}`;
   if(!launchMode(H.data)&&H.tab==="super_cbo") note+=" · via Glued ad pull (small ad sets under-count vs Meta export)";
   if(!launchMode(H.data)&&H.tab==="abo") note+=" · ABO campaign launched Jun 2026 — ROAS still settling, not flagged for kill yet";
