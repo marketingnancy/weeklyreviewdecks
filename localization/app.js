@@ -67,7 +67,7 @@ const crCls = v => v>=6?"g":(v>=4?"a":"r");
 const _MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtStart = iso => { if(!iso) return "—"; const p=String(iso).split("-").map(Number); return `${_MON[p[1]-1]} ${p[2]}, ${p[0]}`; };
 const launchMode = d => !!(d&&d.launch_day);
-const launchLabel = d => (d&&d.period_label)||"Launch day, PDT Oct 6 (1-day click)";
+const launchLabel = d => (d&&d.period_label)||"Relaunch observation (1-day click)";
 function killCharts(){ _charts.forEach(c=>{try{c.destroy()}catch(e){}}); _charts=[]; document.querySelectorAll(".cjs-tip").forEach(e=>e.remove()); }
 /* HTML tooltip — escapes the canvas so it isn't clipped by small chart containers (e.g. the donut) */
 function htmlTooltip(ctx){
@@ -260,12 +260,12 @@ async function openCampaignDrawer(r){
   const first=launchMode(d), period=launchLabel(d);
   const trows=[...days].reverse().map(p=>`<tr><td class="dt">${p.date}</td><td class="num">${usd(p.spend_usd)}</td><td class="num">${usd(p.revenue_usd)}</td><td class="num ${p.spend_usd<1?'zero':roasCls(p.roas)}">${p.spend_usd<1?'—':p.roas.toFixed(2)}</td></tr>`).join("");
   dr.innerHTML=`<div class="drawer-h"><div><div class="dk-lbl">${r.campaign}${r.off?' <span class="offpill">killed</span>':''}</div><div class="dk-big">${bRoas.toFixed(2)}× <span style="font-size:12px;color:var(--mut);font-weight:600">${first?'launch-day ROAS':'7-day ROAS'}</span></div>
-      <div class="sub-note" style="margin:5px 0 0">${first?`${period} · no recommendation`:end===S.date?'last 7 days':'final active week · ended '+end} · spend ${usd(tSpend)} · revenue ${usd(tRev)}</div></div>
+      <div class="sub-note" style="margin:5px 0 0">${first?`${period} · daily-only, no recommendation`:end===S.date?'last 7 days':'final active week · ended '+end} · spend ${usd(tSpend)} · revenue ${usd(tRev)}</div></div>
       <button class="drawer-close" id="dclose" aria-label="Close">✕</button></div>
     <div class="drawer-body">
       <div class="chartbox" style="height:170px;margin-bottom:14px"><canvas id="dchart"></canvas></div>
       <div class="tablewrap"><table><thead><tr><th>Date</th><th class="num">Spend</th><th class="num">Revenue</th><th class="num">ROAS</th></tr></thead>
-        <tbody>${trows}</tbody><tfoot><tr><td class="tot-label">${first?'Launch-day total':'7-day total'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td></tr></tfoot></table></div></div>`;
+        <tbody>${trows}</tbody><tfoot><tr><td class="tot-label">${first?'Daily total':'7-day total'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${roasCls(bRoas)}">${bRoas.toFixed(2)}</td></tr></tfoot></table></div></div>`;
   document.getElementById("dclose").onclick=closeDrawer;
   if(_drawerChart){ try{_drawerChart.destroy()}catch(e){} }
   _drawerChart=new Chart(document.getElementById("dchart"),{type:"bar",
@@ -388,7 +388,7 @@ async function hLoadTable(root){
   H.data=await getJSON(`/api/table?name=${H.tab}&date=${S.date}`); hRenderTable(root);
   const dates=S.tableDates[H.tab]||[]; const span=dates.length?`${dates[dates.length-1]} → ${dates[0]}`:"no data";
   let note=launchMode(H.data)
-    ? `${launchLabel(H.data)} · one closed day only · new relaunch scope; current ad-set budgets verified from Oct 6 screenshots, no inherited pre-pause status or optimization action.`
+    ? `${launchLabel(H.data)} · daily-only relaunch scope; budget source is the Oct 6 Ads Manager screenshot mapping, not live verification. No L7D, pre-pause comparison, or optimization action.`
     : `source: ${HOME_TBL[H.tab]} · available ${span}`;
   if(!launchMode(H.data)&&H.tab==="super_cbo") note+=" · via Glued ad pull (small ad sets under-count vs Meta export)";
   if(!launchMode(H.data)&&H.tab==="abo") note+=" · ABO campaign launched Jun 2026 — ROAS still settling, not flagged for kill yet";
@@ -405,7 +405,7 @@ async function hLoadOpt(root){
   if(basis&&!d.error) basis.textContent=d.launch_day ? launchLabel(d) : `ad-acct day ${d.ad_date} · L7D ${d.l7d_range}`;
   const rules=$("#optrules",root);
   if(rules&&!d.error&&d.launch_day){
-    rules.innerHTML="<b>First-day guard:</b> delivery is reported as a closed one-day baseline only. No automated scale, cut, or kill recommendation is available yet.";
+    rules.innerHTML="<b>Observation hold:</b> delivery is reported daily only. No L7D or pre-pause comparison and no automated scale, cut, or kill recommendation are available until seven completed relaunch days exist.";
   } else if(rules&&!d.error&&d.rules){ const r=d.rules;
     rules.innerHTML=`<b>Rules:</b> KILL if L7D &lt; ${r.kill_roas.toFixed(2)} AND Yest &lt; ${r.kill_roas.toFixed(2)}`
       +` AND L7D spend &gt; HK$${Number(r.kill_min_spend).toLocaleString()}`
@@ -473,7 +473,7 @@ function slideScorecard(d){
     <div class="cmd-insight">${d.insight||""}</div>
     <table class="cmd-tbl"><thead><tr>
       <th class="mlab">LOCALIZATION METRIC</th>
-      <th class="num">${first?"LAUNCH DAY":"YESTERDAY"}</th><th class="num">${first?"PRE-PAUSE L7D":"L7D"}</th><th class="num">${first?"PRE-PAUSE L30D":"L30D"}</th>
+      <th class="num">${first?"DAILY":"YESTERDAY"}</th><th class="num">${first?"L7D N/A":"L7D"}</th><th class="num">${first?"L30D N/A":"L30D"}</th>
       <th class="num tgt">${first?"DAY TARGET":"YDAY BETTER"}</th><th class="num tgt">${first?"":"7D BETTER"}</th><th class="num tgt">${first?"":"30D BETTER"}</th>
     </tr></thead><tbody>${body}</tbody></table>
     <div class="cmd-foot"><span>Currency in USD</span><span>${first?launchLabel(d):`Timezone: HKT (${d.l7d_range} for L7D)`}</span></div>
@@ -491,7 +491,7 @@ function slideDrivers(d){
     </tr>`).join("")}`).join("");
   const empty=(d.groups||[]).length?"":`<tr><td class="mlab" colspan="5" style="color:var(--mut)">No localized ad spend on this day.</td></tr>`;
   return `<div class="cmdsc">
-    ${cmdHead("",first?`Launch-day delivery (${launchLabel(d)})`:"What drove the sales yesterday? ("+(d.day_label||"")+")",d.date,d.owner)}
+    ${cmdHead("",first?`Relaunch daily delivery (${launchLabel(d)})`:"What drove the sales yesterday? ("+(d.day_label||"")+")",d.date,d.owner)}
     <table class="cmd-tbl drv"><thead><tr>
       <th class="mlab">Campaign</th><th class="num">Budget</th><th class="num">${first?"Launch Spend":"Yest Spend"}</th>
       <th class="num">${first?"Launch Revenue":"Yest Revenue"}</th><th class="num">${first?"Launch ROAS":"Yest ROAS"}</th>
@@ -585,20 +585,20 @@ async function renderTrends(view){
   const dRev=d7(rev), dRoas=d7(roas), roas7=avg(roas.slice(-7)), goalR=d.roas_goal||TGT.roas;
   const dir=v=> v==null?"flat":(v>=0?`up ${v}%`:`down ${Math.abs(v)}%`);
   const trRead=first ? `<b>${period}</b>. This is the relaunch's first closed-day baseline; old series are intentionally excluded and no action recommendation is implied.` : `Revenue is <b>${dir(dRev)}</b> on the prior week and spend is <b>${dir(d7(spend))}</b>. The 7-day ROAS sits at <b>${roas7.toFixed(2)}</b>, ${roas7>=goalR?`above the ${goalR} scale line, so there's room to push spend`:`still under the ${goalR} scale line. Efficiency (conversion and creative) needs fixing before more budget goes in`}.`;
-  view.innerHTML=`<div class="sec">${first?"Launch-day performance":"30-day performance trend"}</div>
+  view.innerHTML=`<div class="sec">${first?"Relaunch daily performance":"30-day performance trend"}</div>
     ${insightCard(trRead)}
     <div class="sub-note">${first?`${period} · one closed day only; no L7D/L30D average or trend comparison.`:`Localized markets · daily values with a <b>7-day moving average</b> (bold line) to cut noise · Δ = last 7 days vs prior 7`}</div>
     <div class="tstats">
-      ${stat(first?"Launch-day revenue":"Avg revenue / day", usd(Math.round(avg(rev.slice(-7)))), first?null:d7(rev))}
-      ${stat(first?"Launch-day Meta revenue":"Avg Meta revenue / day", usd(Math.round(avg(mrev.slice(-7)))), first?null:d7(mrev))}
-      ${stat(first?"Launch-day Meta spend":"Avg Meta spend / day", usd(Math.round(avg(spend.slice(-7)))), first?null:d7(spend))}
-      ${stat(first?"Launch-day Meta ROAS":"Avg Meta ROAS", avg(roas.slice(-7)).toFixed(2), first?null:d7(roas))}
-      ${stat(first?"Launch-day revenue":"30-day revenue", usd(rev.reduce((a,b)=>a+b,0)), null)}
+      ${stat(first?"Daily revenue":"Avg revenue / day", usd(Math.round(avg(rev.slice(-7)))), first?null:d7(rev))}
+      ${stat(first?"Daily Meta revenue":"Avg Meta revenue / day", usd(Math.round(avg(mrev.slice(-7)))), first?null:d7(mrev))}
+      ${stat(first?"Daily Meta spend":"Avg Meta spend / day", usd(Math.round(avg(spend.slice(-7)))), first?null:d7(spend))}
+      ${stat(first?"Daily Meta ROAS":"Avg Meta ROAS", avg(roas.slice(-7)).toFixed(2), first?null:d7(roas))}
+      ${stat(first?"Daily revenue":"30-day revenue", usd(rev.reduce((a,b)=>a+b,0)), null)}
     </div>
     <div class="sm-grid">
       <div class="sm-card wide"><div class="sm-h"><span class="sm-t">Shopify revenue / day</span><span class="sm-cur">latest ${usd(last(rev))}</span></div><div class="sm-box"><canvas id="tc_rev"></canvas></div></div>
       <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta spend vs attributed revenue / day</span><span class="sm-cur">ROAS ${last(roas).toFixed(2)}</span></div><div class="sm-box"><canvas id="tc_spend"></canvas></div></div>
-      <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta ROAS / day</span><span class="sm-cur">${first?"first-day observation":`goal ${(d.roas_goal||TGT.roas)} · kill ${(d.roas_kill||TGT.kill)}`}</span></div><div class="sm-box"><canvas id="tc_roas"></canvas></div></div>
+      <div class="sm-card"><div class="sm-h"><span class="sm-t">Meta ROAS / day</span><span class="sm-cur">${first?"daily observation":`goal ${(d.roas_goal||TGT.roas)} · kill ${(d.roas_kill||TGT.kill)}`}</span></div><div class="sm-box"><canvas id="tc_roas"></canvas></div></div>
     </div>`;
   if(!first) view.querySelectorAll(".tstat.clickable").forEach(el=>el.onclick=()=>openKpiDrawer({label:el.dataset.kpi}));
   const bx={grid:{display:false},ticks:{maxRotation:0,autoSkip:true,maxTicksLimit:8}};
@@ -729,7 +729,7 @@ function mkOpp(box,d,goal){
     const rows=pts.map(r=>`<div class="opprow"><span class="om">${r.market}</span><span class="oc">${r.cr.toFixed(1)}%</span><span class="os">${usd(r.spend_usd)}</span><span class="oo">${num(r.sessions)} sess</span></div>`).join("") || `<div class="empty">No measured market rows for ${S.date}.</div>`;
     box.innerHTML=`${insightCard(`<b>${period}</b>. Market points are descriptive baseline observations only; no scale, cut, or opportunity recommendation is issued on the first closed day.`)}
       <div class="sub-note">Each row = a market · 1-day measured PDT Meta spend paired with 1-day HKT Shopify CR and sessions.</div>
-      <div class="panel"><h3 class="cardh">Launch-day market baseline</h3><div class="opplist">${rows}</div></div>`;
+      <div class="panel"><h3 class="cardh">Daily relaunch market baseline</h3><div class="opplist">${rows}</div></div>`;
     return;
   }
   const pts=(d.scatter||[]);
@@ -832,8 +832,8 @@ function cpAll(box,d){
   const foot=`<tr><td class="tot-label">Σ Active</td><td class="num"></td><td class="num">${tBud?usd(tBud):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${first?'':roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num"></td><td class="num"></td></tr>`;
   const off=d.campaigns.filter(r=>r.off);
   const wins=first?[]:act.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
-  const read=first?`<b>${period}</b>. <b>${act.length}</b> localized campaigns delivered on the closed first day at a descriptive blended <b>${bRoas.toFixed(2)}×</b>. Active daily budgets totaling <b>HK$${Number(d.active_daily_budget_hkd||0).toLocaleString()}</b> were verified from the user's Oct 6 Ads Manager screenshots. No scale or kill recommendation is made from one day.`:`<b>${act.length}</b> active localized campaign${act.length!==1?'s':''} ran over the last 7 days at a blended <b>${bRoas.toFixed(2)}×</b>${off.length?`, plus <b>${off.length}</b> killed last week (${off.map(r=>r.campaign).join(", ")})`:''}. ${wins.length?`<b>${wins.length}</b> ${wins.length===1?'is':'are'} scaling (≥${d.scale_thr}×), led by <b>${wins[0].campaign}</b> at ${wins[0].roas.toFixed(2)}×`:`None clear the ${d.scale_thr}× scale line`}.`;
-  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · confirmed screenshot budgets shown in USD equivalent · one closed day only · no automatic recommendation ·`:`Active = last 7 days · <span class="offpill">killed</span> = had spend then stopped — showing its final active week · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr} ·`} click a row for the daily breakdown · the campaign name opens Ads Manager · click headers to sort</div>
+  const read=first?`<b>${period}</b>. <b>${act.length}</b> localized campaigns delivered in the closed daily observation at a descriptive blended <b>${bRoas.toFixed(2)}×</b>. ${d.active_daily_budget_hkd!=null?`Configured daily budgets totaling <b>HK$${Number(d.active_daily_budget_hkd).toLocaleString()}</b> use the Oct 6 Ads Manager screenshot mapping, not live verification.`:"Some screenshot budget mappings are unavailable; no spend estimate is used."} No scale or kill recommendation is made during observation.`:`<b>${act.length}</b> active localized campaign${act.length!==1?'s':''} ran over the last 7 days at a blended <b>${bRoas.toFixed(2)}×</b>${off.length?`, plus <b>${off.length}</b> killed last week (${off.map(r=>r.campaign).join(", ")})`:''}. ${wins.length?`<b>${wins.length}</b> ${wins.length===1?'is':'are'} scaling (≥${d.scale_thr}×), led by <b>${wins[0].campaign}</b> at ${wins[0].roas.toFixed(2)}×`:`None clear the ${d.scale_thr}× scale line`}.`;
+  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · daily-only observation · screenshot budgets shown in USD equivalent · no L7D or automatic recommendation ·`:`Active = last 7 days · <span class="offpill">killed</span> = had spend then stopped — showing its final active week · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr} ·`} click a row for the daily breakdown · the campaign name opens Ads Manager · click headers to sort</div>
     <div class="tablewrap"><table id="cptbl"><thead><tr>${cpHead(COLS,"campaign")}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
   cpWire(box,()=>cpAll(box,d));
   box.querySelectorAll("#cptbl tbody tr").forEach((tr,i)=>{ if(!rows[i])return; tr.style.cursor="pointer";
@@ -862,8 +862,8 @@ function cpAdsets(box,d,rows0,which){
   const nm={cbo:"Super CBO",abo_zenify:"Zenify ABO",abo_website:"Website ABO",abo_medusa:"Medusa ABO"}[which]||"ABO";
   const wins=first?[]:rows0.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
   const note=first?"":(isAbo?" · newly launched Jun 2026 — ROAS still settling":" · CBO: budget self-allocates, so trim losers rather than scale");
-  const read=first?`<b>${period}</b>. <b>${nm}</b> has <b>${rows0.length}</b> delivering ad set${rows0.length!==1?'s':''}; readings are descriptive first-day delivery only.`:`<b>${nm}</b> ran <b>${rows0.length}</b> language ad sets at a blended <b>${bRoas.toFixed(2)}×</b> over 7 days${wins.length?`. Best performer: <b>${wins[0].label}</b> at ${wins[0].roas.toFixed(2)}×`:''}.`;
-  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · one day · no automatic scale/kill recommendation`:`L7D · per language ad set · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr}${note}`} · click headers to sort</div>
+  const read=first?`<b>${period}</b>. <b>${nm}</b> has <b>${rows0.length}</b> delivering ad set${rows0.length!==1?'s':''}; readings are descriptive daily observation only.`:`<b>${nm}</b> ran <b>${rows0.length}</b> language ad sets at a blended <b>${bRoas.toFixed(2)}×</b> over 7 days${wins.length?`. Best performer: <b>${wins[0].label}</b> at ${wins[0].roas.toFixed(2)}×`:''}.`;
+  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · daily only · no L7D or automatic scale/kill recommendation`:`L7D · per language ad set · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr}${note}`} · click headers to sort</div>
     <div class="tablewrap"><table id="cptbl"><thead><tr>${cpHead(COLS,"label")}</tr></thead><tbody>${body}</tbody>${foot?`<tfoot>${foot}</tfoot>`:''}</table></div>`;
   cpWire(box,()=>cpAdsets(box,d,rows0,which));
 }
@@ -874,9 +874,9 @@ async function renderCreative(view){
   const first=launchMode(d), period=launchLabel(d);
   const top=d.ads[0];
   const crRead = first
-    ? (d.ads.length ? `<b>${period}</b>. ${d.ads.length} new localized creative${d.ads.length!==1?'s':''} delivered on the first closed day. These are delivery observations only, not proven winners or scale recommendations.` : `${period}. No new localized creative delivery is recorded yet.`)
+    ? (d.ads.length ? `<b>${period}</b>. ${d.ads.length} localized creative${d.ads.length!==1?'s':''} delivered in the closed daily observation. These are delivery observations only, not proven winners or scale recommendations.` : `${period}. No new localized creative delivery is recorded yet.`)
     : (d.ads.length ? `<b>${d.ads.length}</b> localized creative${d.ads.length!==1?'s':''} are running at <b>ROAS &ge; 2</b> over the last 7 days, ranked by purchases. The leader is <b>${(top.ad_name||'').slice(0,46)}</b> with <b>${top.purchases}</b> purchase${top.purchases!==1?'s':''} at <b>${top.roas.toFixed(2)}×</b> ROAS — the proven winners to scale.` : `No localized creative is at ROAS &ge; 2 for ${S.date}.`);
-  view.innerHTML=`<div class="sec">${first?"Localized creative delivery — launch day":"Top localized creatives — L7D"}</div>
+  view.innerHTML=`<div class="sec">${first?"Localized creative delivery — daily observation":"Top localized creatives — L7D"}</div>
     ${insightCard(crRead)}
     <div class="sub-note">${first?`${period} · ${d.criteria||"descriptive delivery only"}`:"Criteria: <b>ROAS &ge; 2</b> · ranked by most purchases · ads of paused campaigns excluded."}</div>
     <div class="creative-grid">${d.ads.map(a=>`
