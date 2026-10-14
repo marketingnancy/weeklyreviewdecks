@@ -388,7 +388,7 @@ async function hLoadTable(root){
   H.data=await getJSON(`/api/table?name=${H.tab}&date=${S.date}`); hRenderTable(root);
   const dates=S.tableDates[H.tab]||[]; const span=dates.length?`${dates[dates.length-1]} → ${dates[0]}`:"no data";
   let note=launchMode(H.data)
-    ? `${launchLabel(H.data)} · ${H.data.coverage_label||"available relaunch days"} shown as weighted L7D; budget source is the Oct 6 Ads Manager screenshot mapping, not live verification. No pre-pause comparison or optimization action.`
+    ? `${launchLabel(H.data)} · ${H.data.coverage_label||"available relaunch days"} shown as weighted L7D; budget source: ${H.data.budget_source||"Oct 6 screenshot mapping, not live verification"}. No pre-pause comparison or optimization action.`
     : `source: ${HOME_TBL[H.tab]} · available ${span}`;
   if(!launchMode(H.data)&&H.tab==="super_cbo") note+=" · via Glued ad pull (small ad sets under-count vs Meta export)";
   if(!launchMode(H.data)&&H.tab==="abo") note+=" · ABO campaign launched Jun 2026 — ROAS still settling, not flagged for kill yet";
@@ -816,11 +816,12 @@ const cpRowCls=(r,d,newish)=> launchMode(d)||d.scale_thr==null||d.kill_thr==null
 
 function cpAll(box,d){
   const first=launchMode(d), period=launchLabel(d), coverage=d.coverage_label||"available relaunch days";
-  const COLS=[["campaign","Campaign"],["started","Started"],["budget_usd","Budget"],["spend_usd",first?"L7D Spend":"Spend 7d"],["revenue_usd",first?"L7D Revenue":"Revenue 7d"],["roas",first?"ROAS L7D":"ROAS"],["yday",first?"ROAS Y · PDT":"Yday"],["today","Today"]];
+  const COLS=[["campaign","Campaign"],["started","Started"],[d.budget_estimation?"budget_hkd":"budget_usd",d.budget_estimation?"Est. Budget HKD":"Budget"],["spend_usd",first?"L7D Spend":"Spend 7d"],["revenue_usd",first?"L7D Revenue":"Revenue 7d"],["roas",first?"ROAS L7D":"ROAS"],["yday",first?"ROAS Y · PDT":"Yday"],["today","Today"]];
   const rows=cpSort(d.campaigns,"campaign");
   const cell=(r,c)=>{
     if(c==="campaign") return `<td class="txt">${campLink(r.campaign,r.ads_url)}${r.off?` <span class="offpill"${r.last_active?` title="last active ${r.last_active}"`:''}>killed</span>`:''}</td>`;
     if(c==="started") return `<td class="num sub" style="white-space:nowrap">${fmtStart(r.started)}</td>`;
+    if(c==="budget_hkd") return `<td class="num" title="${(r.budget_flags||[]).join('; ')||d.budget_source}">${r.budget_hkd==null?'Unknown':'HK$'+Number(r.budget_hkd).toLocaleString()}</td>`;
     if(c==="budget_usd") return `<td class="num">${r.budget_usd==null?'—':usd(r.budget_usd)}</td>`;
     if(c==="spend_usd") return `<td class="num">${usd(r.spend_usd)}</td>`;
     if(c==="revenue_usd") return `<td class="num">${usd(r.revenue_usd)}</td>`;
@@ -830,13 +831,13 @@ function cpAll(box,d){
   };
   const body=rows.map(r=>`<tr class="${r.off?'off':cpRowCls(r,d,/ABO/i.test(r.campaign))}">${COLS.map(([c])=>cell(r,c)).join("")}</tr>`).join("");
   const act=rows.filter(r=>!r.off);
-  const tBud=act.reduce((s,r)=>s+(r.budget_usd||0),0);
+  const tBud=act.reduce((s,r)=>s+(r[d.budget_estimation?"budget_hkd":"budget_usd"]||0),0);
   const tSpend=act.reduce((s,r)=>s+r.spend_usd,0), tRev=act.reduce((s,r)=>s+r.revenue_usd,0), bRoas=tSpend?tRev/tSpend:0;
-  const foot=`<tr><td class="tot-label">Σ Active</td><td class="num"></td><td class="num">${tBud?usd(tBud):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${first?'':roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num"></td><td class="num"></td></tr>`;
+  const foot=`<tr><td class="tot-label">Σ Active</td><td class="num"></td><td class="num">${tBud?(d.budget_estimation?"HK$"+Number(tBud).toLocaleString():usd(tBud)):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${first?'':roasCls(bRoas)}">${bRoas.toFixed(2)}</td><td class="num"></td><td class="num"></td></tr>`;
   const off=d.campaigns.filter(r=>r.off);
   const wins=first?[]:act.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
-  const read=first?`<b>${period}</b>. <b>${act.length}</b> localized campaigns have <b>${coverage}</b> at a weighted blended L7D <b>${bRoas.toFixed(2)}×</b>. ${d.active_daily_budget_hkd!=null?`Verified daily budget slots total <b>HK$${Number(d.active_daily_budget_hkd).toLocaleString()}</b>.`:"Some screenshot budget mappings are unavailable; no spend estimate is used."} Observation keeps scale, cut, and kill at zero.`:`<b>${act.length}</b> active localized campaign${act.length!==1?'s':''} ran over the last 7 days at a blended <b>${bRoas.toFixed(2)}×</b>${off.length?`, plus <b>${off.length}</b> killed last week (${off.map(r=>r.campaign).join(", ")})`:''}. ${wins.length?`<b>${wins.length}</b> ${wins.length===1?'is':'are'} scaling (≥${d.scale_thr}×), led by <b>${wins[0].campaign}</b> at ${wins[0].roas.toFixed(2)}×`:`None clear the ${d.scale_thr}× scale line`}.`;
-  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · ${coverage} · L7D is weighted source-DB spend/revenue; Y is the closed PDT day · screenshot budgets shown in USD equivalent · observation hold: no automatic recommendation ·`:`Active = last 7 days · <span class="offpill">killed</span> = had spend then stopped — showing its final active week · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr} ·`} click a row for the daily breakdown · the campaign name opens Ads Manager · click headers to sort</div>
+  const read=first?`<b>${period}</b>. <b>${act.length}</b> localized campaigns have <b>${coverage}</b> at a weighted blended L7D <b>${bRoas.toFixed(2)}×</b>. ${d.active_daily_budget_hkd!=null?`${d.budget_estimation?"Estimated daily budget subtotal":"Verified daily budget slots total"} <b>HK$${Number(d.active_daily_budget_hkd).toLocaleString()}</b>.`:"Some screenshot budget mappings are unavailable; no spend estimate is used."} ${d.observation_hold?"Observation keeps scale, cut, and kill at zero.":"All PPC recommendations require user approval; none executed."}`:`<b>${act.length}</b> active localized campaign${act.length!==1?'s':''} ran over the last 7 days at a blended <b>${bRoas.toFixed(2)}×</b>${off.length?`, plus <b>${off.length}</b> killed last week (${off.map(r=>r.campaign).join(", ")})`:''}. ${wins.length?`<b>${wins.length}</b> ${wins.length===1?'is':'are'} scaling (≥${d.scale_thr}×), led by <b>${wins[0].campaign}</b> at ${wins[0].roas.toFixed(2)}×`:`None clear the ${d.scale_thr}× scale line`}.`;
+  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · ${coverage} · L7D is weighted source-DB spend/revenue; Y is the closed PDT day · ${d.budget_estimation?d.budget_source+" · "+d.budget_estimation.estimated_adsets+" estimated sets; "+d.budget_estimation.unestimated_adsets+" zero-spend sets unknown and excluded; "+d.budget_estimation.flagged_estimates+" weak estimates":"screenshot budgets shown in USD equivalent"} · recommendations only, no Ads Manager changes ·`:`Active = last 7 days · <span class="offpill">killed</span> = had spend then stopped — showing its final active week · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr} ·`} click a row for the daily breakdown · the campaign name opens Ads Manager · click headers to sort</div>
     <div class="tablewrap"><table id="cptbl"><thead><tr>${cpHead(COLS,"campaign")}</tr></thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
   cpWire(box,()=>cpAll(box,d));
   box.querySelectorAll("#cptbl tbody tr").forEach((tr,i)=>{ if(!rows[i])return; tr.style.cursor="pointer";
@@ -845,11 +846,12 @@ function cpAll(box,d){
 
 function cpAdsets(box,d,rows0,which){
   const first=launchMode(d), period=launchLabel(d), coverage=d.coverage_label||"available relaunch days";
-  const COLS=[["label","Ad set"],["countries","Countries"],["budget_usd","Budget"],["spend_usd",first?"L7D Spend":"Spend 7d"],["revenue_usd",first?"L7D Revenue":"Revenue 7d"],["roas",first?"ROAS L7D":"ROAS"],...(first?[["yday","ROAS Y · PDT"]]:[]),["impressions","Impressions"]];
+  const COLS=[["label","Ad set"],["countries","Countries"],[d.budget_estimation?"budget_hkd":"budget_usd",d.budget_estimation?"Est. Budget HKD":"Budget"],["spend_usd",first?"L7D Spend":"Spend 7d"],["revenue_usd",first?"L7D Revenue":"Revenue 7d"],["roas",first?"ROAS L7D":"ROAS"],...(first?[["yday","ROAS Y · PDT"]]:[]),["impressions","Impressions"]];
   const rows=cpSort(rows0,"label");
   const cell=(r,c)=>{
     if(c==="label") return `<td class="txt">${r.label}${r.delivery==='inactive'?' <span class="offpill">inactive</span>':r.delivery==='active'?' <span class="onpill">active</span>':''}</td>`;
     if(c==="countries") return `<td class="txt sub">${r.countries||'—'}</td>`;
+    if(c==="budget_hkd") return `<td class="num" title="${(r.budget_flags||[]).join('; ')||d.budget_source}">${r.budget_hkd==null?'Unknown':'HK$'+Number(r.budget_hkd).toLocaleString()}</td>`;
     if(c==="budget_usd") return `<td class="num">${r.budget_usd==null?'—':usd(r.budget_usd)}</td>`;
     if(c==="spend_usd") return `<td class="num">${usd(r.spend_usd)}</td>`;
     if(c==="revenue_usd") return `<td class="num">${usd(r.revenue_usd)}</td>`;
@@ -861,13 +863,13 @@ function cpAdsets(box,d,rows0,which){
   const body=rows.length?rows.map(r=>`<tr class="${cpRowCls(r,d,isAbo)}">${COLS.map(([c])=>cell(r,c)).join("")}</tr>`).join("")
     :`<tr><td class="empty" colspan="7">No ad sets delivering on ${S.date}.</td></tr>`;
   const tSpend=rows.reduce((s,r)=>s+r.spend_usd,0), tRev=rows.reduce((s,r)=>s+r.revenue_usd,0), tImp=rows.reduce((s,r)=>s+(r.impressions||0),0), bRoas=tSpend?tRev/tSpend:0;
-  const tBudget=rows.reduce((s,r)=>s+(r.budget_usd||0),0);
-  const foot=rows.length?`<tr><td class="tot-label">Σ Blended</td><td class="num"></td><td class="num">${tBudget?usd(tBudget):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${first?'':roasCls(bRoas)}">${bRoas.toFixed(2)}</td>${first?'<td class="num"></td>':''}<td class="num">${num(tImp)}</td></tr>`:"";
+  const tBudget=rows.reduce((s,r)=>s+(r[d.budget_estimation?"budget_hkd":"budget_usd"]||0),0);
+  const foot=rows.length?`<tr><td class="tot-label">Σ Blended</td><td class="num"></td><td class="num">${tBudget?(d.budget_estimation?"HK$"+Number(tBudget).toLocaleString():usd(tBudget)):'—'}</td><td class="num">${usd(tSpend)}</td><td class="num">${usd(tRev)}</td><td class="num ${first?'':roasCls(bRoas)}">${bRoas.toFixed(2)}</td>${first?'<td class="num"></td>':''}<td class="num">${num(tImp)}</td></tr>`:"";
   const nm={cbo:"Super CBO",abo_zenify:"Zenify ABO",abo_website:"Website ABO",abo_medusa:"Medusa ABO"}[which]||"ABO";
   const wins=first?[]:rows0.filter(r=>r.spend_usd>=1&&r.roas>=d.scale_thr).sort((a,b)=>b.roas-a.roas);
   const note=first?"":(isAbo?" · newly launched Jun 2026 — ROAS still settling":" · CBO: budget self-allocates, so trim losers rather than scale");
-  const read=first?`<b>${period}</b>. <b>${nm}</b> has <b>${rows0.length}</b> delivering ad set${rows0.length!==1?'s':''} across <b>${coverage}</b>; readings are descriptive weighted L7D observation only.`:`<b>${nm}</b> ran <b>${rows0.length}</b> language ad sets at a blended <b>${bRoas.toFixed(2)}×</b> over 7 days${wins.length?`. Best performer: <b>${wins[0].label}</b> at ${wins[0].roas.toFixed(2)}×`:''}.`;
-  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · ${coverage} · weighted L7D plus closed PDT yesterday · observation hold: no automatic scale/kill recommendation`:`L7D · per language ad set · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr}${note}`} · click headers to sort</div>
+  const read=first?`<b>${period}</b>. <b>${nm}</b> has <b>${rows0.length}</b> delivering ad set${rows0.length!==1?'s':''} across <b>${coverage}</b>; readings are descriptive weighted L7D, not automatic budget changes.`:`<b>${nm}</b> ran <b>${rows0.length}</b> language ad sets at a blended <b>${bRoas.toFixed(2)}×</b> over 7 days${wins.length?`. Best performer: <b>${wins[0].label}</b> at ${wins[0].roas.toFixed(2)}×`:''}.`;
+  box.innerHTML=`${insightCard(read)}<div class="sub-note">${first?`${period} · ${coverage} · weighted L7D plus closed PDT yesterday · ${d.budget_estimation?d.budget_source+" · "+d.budget_estimation.flagged_estimates+" weak estimates; status not inferred":"no automatic scale/kill recommendation"}`:`L7D · per language ad set · ${SD.g} ROAS ≥${d.scale_thr} ${SD.r} ≤${d.kill_thr}${note}`} · click headers to sort</div>
     <div class="tablewrap"><table id="cptbl"><thead><tr>${cpHead(COLS,"label")}</tr></thead><tbody>${body}</tbody>${foot?`<tfoot>${foot}</tfoot>`:''}</table></div>`;
   cpWire(box,()=>cpAdsets(box,d,rows0,which));
 }
