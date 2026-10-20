@@ -422,6 +422,7 @@ async function renderHome(view){
       <div class="col-head"><span class="k">The Report</span>
         <span class="ch-r"><span class="folio">${S.date}</span><button id="copybtn" class="copybtn" type="button">Copy</button></span></div>
       <pre id="report">Loading…</pre>
+      <details class="note" id="neilpanel"><summary>Neil's read</summary><p id="neilsread"></p></details>
     </section>
     <section class="ledger">
       <div class="tabs" id="tabs" role="tablist"></div>
@@ -447,7 +448,7 @@ async function renderHome(view){
   // tables/opt load fast; the report does a live Glued pull (Today ROAS) so let it fill in async
   hTabs(view); hLoadTable(view); hLoadOpt(view);
   getJSON(`/api/scorecard?date=${S.date}&window=day`).then(d=>{ setTargets(d); const el=$("#kstrip",view); if(el&&d.kpis) el.innerHTML=d.kpis.map(k=>kpiCard(k,{launch:launchMode(d)})).join(""); });
-  getJSON(`/api/report?date=${S.date}`).then(j=>{ H.reportText=j.error?"":j.text; const el=$("#report",view); if(el) el.textContent=j.error?("Error: "+j.error):j.text; });
+  getJSON(`/api/report?date=${S.date}`).then(j=>{ H.reportText=j.error?"":j.text; const el=$("#report",view); if(el) el.textContent=j.error?("Error: "+j.error):j.text; const neil=$("#neilsread",view); if(neil) neil.textContent=j.neils_read||""; const panel=$("#neilpanel",view); if(panel) panel.hidden=!j.neils_read; });
 }
 
 /* ═══════════════════════ SCORECARD ═══════════════════════ */
