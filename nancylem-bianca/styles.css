@@ -444,3 +444,4 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .sc-foot{position:absolute;left:45px;bottom:16px;font-size:10px;color:#8a859c}
 .n3 .sc-lbl{white-space:nowrap;font-size:12.5px}
 .n3 .sc-row{grid-template-columns:.95fr 1fr 1fr 1fr}
+.dec-box .sc-red{color:#c0392b}

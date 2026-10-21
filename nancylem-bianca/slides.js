@@ -12,7 +12,7 @@
       <p class="s-kicker">${esc(slide.kicker || "")}</p>
       ${opts.title === false ? "" : `<h1 class="s-title">${esc(slide.title || "")}</h1>`}
       <div class="s-meta">
-        <div class="s-thru">DATA THRU <b>${esc(meta.data_thru || "—")}</b>${week}</div>
+        ${slide.hide_thru ? "" : `<div class="s-thru">DATA THRU <b>${esc(meta.data_thru || "—")}</b>${week}</div>`}
         ${owner}
       </div>`;
   }
@@ -190,7 +190,7 @@
       ${header(slide, meta)}
       <div class="dec-boxes">
         <div class="dec-box"><div class="db-h">WHAT WE DID — LAST 7 DAYS</div><ul>${did}</ul></div>
-        <div class="dec-box bc"><div class="db-h good">THE BINDING CONSTRAINT (from scorecard)</div><p>${esc(slide.binding_constraint)}</p></div>
+        <div class="dec-box bc"><div class="db-h good">THE BINDING CONSTRAINT (from scorecard)</div><p>${rich(slide.binding_constraint)}</p></div>
       </div>
       <div class="dec-need">DECISIONS NEEDED FROM YOU TODAY</div>
       <table class="dectable">
