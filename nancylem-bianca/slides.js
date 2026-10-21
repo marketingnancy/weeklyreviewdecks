@@ -316,6 +316,34 @@
       <div class="rm-track"><div class="rm-line"></div><div class="rm-fill" style="width:${Math.round((slide.progress || 0) * 100)}%"></div>${phases}</div>`;
   }
 
+  // light scorecard: header + callout + metric cards. Text supports **bold** and [[red]].
+  const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[\[(.+?)\]\]/g, '<b class="sc-red">$1</b>');
+  function cards(slide) {
+    const card = c => {
+      const cols = c.cols || slide.cols;
+      const head = cols.map(h => `<div class="sc-ch"><div>${esc(h[0])}</div><span>${esc(h[1] || "")}</span></div>`).join("");
+      const rows = c.rows.map(r => {
+        if (r.section) return `<div class="sc-sec"><b>${esc(r.section)}</b> ${esc(r.section_sub || "")}</div>`;
+        const cells = r.cells.map(v => `<div class="sc-v${v[2] ? " t-" + esc(v[2]) : ""}"><div>${esc(v[0])}</div>${v[1] ? `<span>${rich(v[1])}</span>` : ""}</div>`).join("");
+        const dot = r.dot ? `<i class="sc-dot d-${esc(r.dot)}"></i>` : "";
+        return `<div class="sc-row${r.big ? " big" : ""}${r.shaded ? " shaded" : ""}${r.bold ? " bold" : ""}"><div class="sc-lbl">${dot}${esc(r.label)}</div>${cells}</div>`;
+      }).join("");
+      return `<div class="sc-card">
+          <div class="sc-ct"><div class="sc-title">${c.dot ? `<i class="sc-dot d-${esc(c.dot)}"></i>` : ""}${esc(c.title)}</div><div class="sc-note">${esc(c.note || "")}</div></div>
+          <div class="sc-row sc-hrow"><div class="sc-lbl"></div>${head}</div>
+          <div class="sc-body">${rows}</div>
+        </div>`;
+    };
+    return `
+      <p class="s-kicker">${esc(slide.kicker || "")}</p>
+      <h1 class="sc-h1">${esc(slide.title)}</h1>
+      <div class="sc-subt">${esc(slide.subtitle || "")}</div>
+      ${ownerPill(slide)}
+      ${slide.callout ? `<div class="sc-callout">${rich(slide.callout)}</div>` : ""}
+      <div class="sc-cards n${slide.cards.length}">${slide.cards.map(card).join("")}</div>
+      <div class="sc-foot">${esc(slide.footnote || "")}</div>`;
+  }
+
   function openZoom(src) {
     const ov = document.createElement("div");
     ov.className = "zoom-ov";
@@ -328,7 +356,7 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards };
   const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1 };
 
   window.LEMSlides = {
