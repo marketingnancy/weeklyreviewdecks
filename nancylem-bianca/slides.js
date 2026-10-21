@@ -296,6 +296,26 @@
       </table>`;
   }
 
+  // revenue roadmap cover: big target, rising bars, phase track
+  function roadmap(slide) {
+    const bars = (slide.bars || []).map((h, i, a) =>
+      `<div class="rm-bar${i === a.length - 1 ? " top" : ""}" style="height:${Math.round(h * 100)}%"></div>`).join("");
+    const phases = slide.phases.map((p, i) => `
+      <div class="rm-ph ${i === 0 ? "first" : i === slide.phases.length - 1 ? "last" : "mid"}${p.active ? " on" : ""}" style="left:${(i / (slide.phases.length - 1)) * 100}%">
+        <span class="rm-dot"></span>
+        <div class="rm-plbl">${esc(p.label)}</div>
+        <div class="rm-pval">${esc(p.value)}</div>
+      </div>`).join("");
+    return `
+      <div class="rm-glow"></div>
+      <div class="rm-brand"><span class="rm-logo">${esc(slide.brand)}</span><span class="rm-sep"></span><span class="rm-lbl">${esc(slide.label)}</span></div>
+      <div class="rm-chip"><span></span>${esc(slide.chip)}</div>
+      <div class="rm-amt">${esc(slide.amount)}<span>${esc(slide.amount_suffix || "")}</span></div>
+      <div class="rm-sub"><b>${esc(slide.sub_bold)}</b> — ${esc(slide.sub)}</div>
+      <div class="rm-chart"><div class="rm-tgt">${esc(slide.target_label || "Target ↑")}</div><div class="rm-bars">${bars}</div></div>
+      <div class="rm-track"><div class="rm-line"></div><div class="rm-fill" style="width:${Math.round((slide.progress || 0) * 100)}%"></div>${phases}</div>`;
+  }
+
   function openZoom(src) {
     const ov = document.createElement("div");
     ov.className = "zoom-ov";
@@ -308,8 +328,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
