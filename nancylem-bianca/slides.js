@@ -316,6 +316,16 @@
       <div class="rm-track"><div class="rm-line"></div><div class="rm-fill" style="width:${Math.round((slide.progress || 0) * 100)}%"></div>${phases}</div>`;
   }
 
+  // worked example: stacked screenshots + takeaway line
+  function example(slide) {
+    const shots = slide.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("");
+    return `
+      ${ownerPill(slide)}
+      <h1 class="ex-title">${esc(slide.title)}</h1>
+      <div class="ex-shots">${shots}</div>
+      <div class="ex-cap">${esc(slide.caption)}</div>`;
+  }
+
   // light scorecard: header + callout + metric cards. Text supports **bold** and [[red]].
   const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[\[(.+?)\]\]/g, '<b class="sc-red">$1</b>');
   function cards(slide) {
@@ -356,8 +366,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },

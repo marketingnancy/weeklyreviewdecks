@@ -445,3 +445,9 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .n3 .sc-lbl{white-space:nowrap;font-size:12.5px}
 .n3 .sc-row{grid-template-columns:.95fr 1fr 1fr 1fr}
 .dec-box .sc-red{color:#c0392b}
+
+/* ── worked example ────────────────────────────────────────────────────────── */
+.ex-title{font-family:Georgia,"Times New Roman",serif;font-size:46px;font-weight:700;color:#fff;margin:26px 0 0}
+.ex-shots{position:absolute;left:56px;right:56px;top:142px;display:flex;flex-direction:column;gap:38px}
+.ex-shots img{width:100%;display:block}
+.ex-cap{position:absolute;left:56px;right:56px;bottom:62px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:27px;color:#fff}
