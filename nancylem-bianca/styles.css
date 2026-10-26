@@ -469,3 +469,9 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .fl-os{color:#e9e6f2;font-size:10px;margin-top:5px}
 .fl-out.t-bad{border-color:#f06a6a;background:#3d0505}.fl-out.t-bad .fl-oh{color:#f06a6a}
 .fl-lbl{position:absolute;font-size:12.5px;font-weight:700;background:#100c1f;padding:0 3px;white-space:nowrap}
+.fl-goal{position:absolute;left:950px;top:162px;width:250px;background:#1f1840;border:2px solid var(--lav);border-radius:12px;padding:18px 20px}
+.fl-gl{color:var(--lav);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.fl-gi{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;padding-top:10px;border-top:1px solid #2f2756}
+.fl-gi span{color:#c9c2df;font-size:14px}
+.fl-gi b{color:var(--lav);font-size:32px;font-weight:800;line-height:1}
+.fl-gn{color:#8f88aa;font-size:11px;line-height:1.4;margin-top:12px}

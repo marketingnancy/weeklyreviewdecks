@@ -343,6 +343,11 @@
         ${arrow(360, 471, 360, 520, OR)}${arrow(506, 561, 639, 528, G)}${arrow(506, 585, 639, 632, R)}
       </svg>
       ${steps}${outs}
+      ${slide.goal ? `<div class="fl-goal">
+        <div class="fl-gl">${esc(slide.goal.label)}</div>
+        ${slide.goal.items.map(g => `<div class="fl-gi"><span>${esc(g.k)}</span><b>${esc(g.v)}</b></div>`).join("")}
+        ${slide.goal.note ? `<div class="fl-gn">${esc(slide.goal.note)}</div>` : ""}
+      </div>` : ""}
       ${lbl(526, 183, L[0], G)}${lbl(282, 288, L[1], OR)}${lbl(528, 337, L[2], G)}
       ${lbl(282, 474, L[3], OR)}${lbl(528, 507, L[4], G)}${lbl(528, 612, L[5], R)}`;
   }
