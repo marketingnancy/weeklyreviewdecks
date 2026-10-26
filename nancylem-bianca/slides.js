@@ -316,6 +316,37 @@
       <div class="rm-track"><div class="rm-line"></div><div class="rm-fill" style="width:${Math.round((slide.progress || 0) * 100)}%"></div>${phases}</div>`;
   }
 
+  // decision flow: 3 step boxes on the left, outcome pills on the right (fixed 3×4 layout, text from data)
+  function flow(slide) {
+    const S = [[162, 263], [342, 471], [522, 640]];            // step box top/bottom (slide px)
+    const O = [177, 315, 498, 606];                              // outcome pill tops (76px tall)
+    const steps = slide.steps.map((s, i) => `
+      <div class="fl-step" style="top:${S[i][0]}px;height:${S[i][1] - S[i][0]}px">
+        <div class="fl-tag">${esc(s.tag)}</div><div class="fl-h">${esc(s.title)}</div><div class="fl-sub">${esc(s.sub)}</div>
+        ${s.chip ? `<div class="fl-chip">${esc(s.chip)}</div>` : ""}
+      </div>`).join("");
+    const outs = slide.outcomes.map((o, i) => `
+      <div class="fl-out t-${esc(o.tone)}" style="top:${O[i]}px">
+        <div class="fl-oh">${o.tone === "bad" ? "✗" : "✓"} ${esc(o.title)}</div><div class="fl-os">${esc(o.sub)}</div>
+      </div>`).join("");
+    const L = slide.links;                                       // [good, bad, 1dc ok, also bad, incr ok, incr low]
+    const arrow = (x1, y1, x2, y2, c) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2" marker-end="url(#fl-${c === G ? "g" : c === R ? "r" : "o"})"/>`;
+    const G = "#a4e339", R = "#f06a6a", OR = "#f39a3c";
+    const lbl = (x, y, t, c) => `<div class="fl-lbl" style="left:${x}px;top:${y}px;color:${c}">${esc(t)}</div>`;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title">${esc(slide.title)}</h1>
+      <svg class="fl-svg" viewBox="0 0 1280 720">
+        <defs>${[["g", G], ["r", R], ["o", OR]].map(([k, c]) => `<marker id="fl-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`).join("")}</defs>
+        ${arrow(506, 200, 639, 200, G)}${arrow(360, 263, 360, 340, OR)}${arrow(506, 388, 639, 340, G)}
+        ${arrow(360, 471, 360, 520, OR)}${arrow(506, 561, 639, 528, G)}${arrow(506, 585, 639, 632, R)}
+      </svg>
+      ${steps}${outs}
+      ${lbl(526, 183, L[0], G)}${lbl(282, 288, L[1], OR)}${lbl(528, 337, L[2], G)}
+      ${lbl(282, 474, L[3], OR)}${lbl(528, 507, L[4], G)}${lbl(528, 612, L[5], R)}`;
+  }
+
   // worked example: stacked screenshots + takeaway line
   function example(slide) {
     const shots = slide.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("");
@@ -366,8 +397,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
