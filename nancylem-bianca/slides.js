@@ -378,6 +378,28 @@
       <div class="gp-panels">${panel(slide.now)}<div class="gp-arrow">→</div>${panel(slide.goal)}</div>`;
   }
 
+  // ad winner criteria: per-funnel thresholds on the left, winner counts on the right
+  function criteria(slide) {
+    const crit = c => `
+      <div class="cr-box t-${esc(c.tone)}">
+        <div class="cr-h">${esc(c.title)}</div>
+        <div class="cr-conds">${c.conds.map((x, i) => `${i ? `<span class="cr-and">AND</span>` : ""}
+          <div class="cr-cond"><div class="cr-cl">${esc(x.label)}</div><div class="cr-cv">${esc(x.value)}</div><div class="cr-cs">${esc(x.sub)}</div></div>`).join("")}</div>
+      </div>`;
+    const t = slide.total, w = slide.lem;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title cr-title">${esc(slide.title)}</h1>
+      <div class="cr-lbl" style="left:80px">${esc(slide.criteria_label)}</div>
+      <div class="cr-lbl" style="left:621px">${esc(slide.results_label)}</div>
+      <div class="cr-left">${slide.criteria.map(crit).join("")}</div>
+      <div class="cr-total"><div class="cr-tl">${esc(t.label)}</div><div class="cr-tv">${esc(t.value)}</div><div class="cr-ts">${esc(t.sub)}</div></div>
+      <div class="cr-lem"><div class="cr-ll">${esc(w.label)}</div><div class="cr-lv">${esc(w.value)}</div><div class="cr-ls">${esc(w.sub)}</div>
+        <div class="cr-split">${w.split.map(s => `<div class="cr-sp t-${esc(s.tone)}"><div>${esc(s.label)}</div><b>${esc(s.value)}</b><span>${esc(s.sub)}</span></div>`).join("")}</div>
+      </div>`;
+  }
+
   // screenshot gallery: any number of images fitted into a grid under the title
   function gallery(slide) {
     const imgs = slide.images || [];
@@ -441,8 +463,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
