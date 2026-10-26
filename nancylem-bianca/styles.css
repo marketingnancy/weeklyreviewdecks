@@ -558,3 +558,12 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .qs-n{flex:0 0 40px;height:40px;border-radius:50%;background:var(--lav);color:#100c1f;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center}
 .qs-q{color:#fff;font-size:21px;font-weight:700;line-height:1.35}
 .qs-d{color:#b8b0d4;font-size:16px;line-height:1.5;margin-top:6px}
+/* questions with example photos: tighter text so the photo row fits */
+.qs-list:has(.qs-imgs){top:140px;bottom:22px;gap:12px}
+.qs-list:has(.qs-imgs) .qs-item{padding:16px 24px}
+.qs-list:has(.qs-imgs) .qs-q{font-size:18px}
+.qs-list:has(.qs-imgs) .qs-d{font-size:14px}
+.qs-list:has(.qs-imgs) .qs-item:has(.qs-imgs){flex:1;min-height:0}
+.qs-body{display:flex;flex-direction:column;min-height:0;min-width:0;flex:1}
+.qs-imgs{flex:1;min-height:0;min-width:0;display:flex;gap:14px;margin-top:12px;overflow:hidden}
+.qs-imgs img{height:100%;width:auto;border-radius:8px;object-fit:cover}

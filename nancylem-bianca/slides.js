@@ -417,7 +417,8 @@
   function questions(slide) {
     const items = slide.items.map((q, i) => `
       <div class="qs-item"><div class="qs-n">${i + 1}</div>
-        <div><div class="qs-q">${esc(q.q)}</div>${q.detail ? `<div class="qs-d">${esc(q.detail)}</div>` : ""}</div>
+        <div class="qs-body"><div class="qs-q">${esc(q.q)}</div>${q.detail ? `<div class="qs-d">${esc(q.detail)}</div>` : ""}
+          ${q.images ? `<div class="qs-imgs">${q.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("")}</div>` : ""}</div>
       </div>`).join("");
     return `
       ${ownerPill(slide)}
