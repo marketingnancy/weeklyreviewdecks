@@ -512,3 +512,10 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .gp-v.t-green,.gp-rv em.t-green,.gp-chip b.t-green{color:#a4e339}
 .gp-tag{font-style:normal;font-size:8px;font-weight:700;padding:3px 7px;border-radius:9px;background:#33461c;color:#c7f08a}
 .gp-tag.lav{background:#2e2552;color:#cdb4f7}
+
+/* ── screenshot gallery ────────────────────────────────────────────────────── */
+.ga-title{position:absolute;left:40px;top:26px;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:34px;font-weight:700;color:#fff}
+.slide:has(.ga-grid) .nx-owner{top:30px;right:40px}
+.ga-grid{position:absolute;left:40px;right:40px;top:96px;bottom:30px;display:grid;gap:14px}
+.ga-cell{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center}
+.ga-cell img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;display:block}
