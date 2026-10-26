@@ -413,6 +413,19 @@
       <div class="ga-grid" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${cells}</div>`;
   }
 
+  // open questions: numbered cards, each a headline question plus optional context
+  function questions(slide) {
+    const items = slide.items.map((q, i) => `
+      <div class="qs-item"><div class="qs-n">${i + 1}</div>
+        <div><div class="qs-q">${esc(q.q)}</div>${q.detail ? `<div class="qs-d">${esc(q.detail)}</div>` : ""}</div>
+      </div>`).join("");
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title">${esc(slide.title)}</h1>
+      <div class="qs-list">${items}</div>`;
+  }
+
   // worked example: stacked screenshots + takeaway line
   function example(slide) {
     const shots = slide.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("");
@@ -463,8 +476,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
