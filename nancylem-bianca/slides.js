@@ -413,6 +413,23 @@
       <div class="ga-grid" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${cells}</div>`;
   }
 
+  // creative angles table (light): thumbnails, angle, rationale, brief bullets + landing pages
+  function angles(slide) {
+    const li = b => typeof b === "string" ? `<li>${esc(b)}</li>`
+      : `<li>${esc(b.text)}<ul>${b.sub.map(s => `<li>${esc(s)}</li>`).join("")}</ul></li>`;
+    const rows = slide.rows.map(r => `<tr>
+        <td class="an-ph"><div>${r.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("")}</div></td>
+        <td class="an-ang">${esc(r.angle)}</td>
+        <td class="an-why">${esc(r.why)}</td>
+        <td class="an-brief"><ul>${r.brief.map(li).join("")}</ul>
+          ${r.directing ? `<div class="an-dir"><b>Directing to:</b>${r.directing.map(u => `<div>${esc(u)}</div>`).join("")}</div>` : ""}</td>
+      </tr>`).join("");
+    return `
+      <h1 class="an-title">${esc(slide.title)}</h1>
+      <table class="an-table"><thead><tr><th>Photo</th><th>Angle</th><th>Why we want it</th><th>Creative brief</th></tr></thead><tbody>${rows}</tbody></table>
+      ${slide.note ? `<div class="an-note">${esc(slide.note)}</div>` : ""}`;
+  }
+
   // open questions: numbered cards, each a headline question plus optional context
   function questions(slide) {
     const items = slide.items.map((q, i) => `
@@ -477,7 +494,7 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles };
   const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1 };
 
   window.LEMSlides = {

@@ -567,3 +567,22 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .qs-body{display:flex;flex-direction:column;min-height:0;min-width:0;flex:1}
 .qs-imgs{flex:1;min-height:0;min-width:0;display:flex;gap:14px;margin-top:12px;overflow:hidden}
 .qs-imgs img{height:100%;width:auto;border-radius:8px;object-fit:cover}
+
+/* ── creative angles table (light) ─────────────────────────────────────────── */
+.slide:has(.an-table){background:#fff;padding:0}
+.an-title{position:absolute;left:44px;top:18px;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:31px;font-weight:700;color:#1d1a33}
+.an-table{position:absolute;left:44px;right:44px;top:72px;width:calc(100% - 88px);border-collapse:collapse;color:#1d1a33;table-layout:fixed}
+.an-table th{background:#1d1a33;color:#fff;text-align:left;font-size:14.5px;font-weight:600;padding:7px 10px;border-right:1px solid #3a3558}
+.an-table th:nth-child(1){width:308px}.an-table th:nth-child(2){width:122px}.an-table th:nth-child(3){width:238px}
+.an-table td{border:1px solid #d9d6e2;vertical-align:middle;padding:8px 10px}
+.an-ph div{display:flex;gap:6px}
+.an-ph img{width:68px;height:120px;object-fit:cover;border-radius:4px;display:block}
+.an-ang{font-size:16px;font-weight:700;line-height:1.25}
+.an-why{font-size:13px;line-height:1.45;color:#2c2840}
+.an-brief{font-size:10.5px;line-height:1.45;color:#2c2840}
+.an-brief ul{margin:0;padding-left:14px}
+.an-brief ul ul{padding-left:16px;margin-top:1px}
+.an-brief li{margin-bottom:2px}
+.an-dir{margin-top:5px}
+.an-dir b{display:block;font-size:10.5px;margin-bottom:1px}
+.an-note{position:absolute;left:44px;bottom:12px;font-size:12px;font-style:italic;color:#b0306a}
