@@ -586,3 +586,26 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .an-dir{margin-top:5px}
 .an-dir b{display:block;font-size:10.5px;margin-bottom:1px}
 .an-note{position:absolute;left:44px;bottom:12px;font-size:12px;font-style:italic;color:#b0306a}
+
+/* ── ad winner criteria: results layout ───────────────────────────────────── */
+.cr-kick{left:60px;top:32px}
+.fl-title.cr-title{left:60px;top:58px;font-size:38px}
+.cr-lbl{left:60px;top:119px;font-size:10px}
+.cr-left{left:60px;top:144px;width:360px;bottom:38px;gap:12px}
+.cr-box{padding:22px 24px}
+.cr-conds{margin-top:14px}
+.cr-cond{padding:12px 14px;min-width:0}
+.cr-and{width:40px;flex:0 0 40px}
+.cr-cv{font-size:30px}
+.cr-results{position:absolute;left:439px;right:60px;top:121px;bottom:38px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cr-res{background:#1f1840;border-left:4px solid var(--lav);border-radius:12px;padding:0 34px;display:flex;flex-direction:column;justify-content:center}
+.cr-res.t-orange{border-left-color:#f39a3c}
+.cr-rl{color:var(--lav);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.cr-rv{display:flex;align-items:baseline;gap:12px;margin-top:18px}
+.cr-rv b{color:var(--lav);font-size:92px;font-weight:800;line-height:1}
+.cr-rv span{color:#6f6893;font-size:32px}
+.cr-rd{height:1px;background:#2f2756;margin:26px 0 22px}
+.cr-ra{color:#fff;font-size:16px}
+.cr-ra em{font-style:normal;color:var(--lav)}
+.cr-rs{color:#8f88aa;font-size:13px;margin-top:8px}
+.cr-res.t-orange .cr-rl,.cr-res.t-orange .cr-rv b,.cr-res.t-orange .cr-ra em{color:#f39a3c}

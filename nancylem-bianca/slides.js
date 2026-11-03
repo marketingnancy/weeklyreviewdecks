@@ -386,18 +386,21 @@
         <div class="cr-conds">${c.conds.map((x, i) => `${i ? `<span class="cr-and">AND</span>` : ""}
           <div class="cr-cond"><div class="cr-cl">${esc(x.label)}</div><div class="cr-cv">${esc(x.value)}</div><div class="cr-cs">${esc(x.sub)}</div></div>`).join("")}</div>
       </div>`;
-    const t = slide.total, w = slide.lem;
+    const res = r => `
+      <div class="cr-res t-${esc(r.tone)}">
+        <div class="cr-rl">${esc(r.label)}</div>
+        <div class="cr-rv"><b>${esc(r.value)}</b><span>${esc(r.of)}</span></div>
+        <div class="cr-rd"></div>
+        <div class="cr-ra">are <em>${esc(r.line)}</em></div>
+        <div class="cr-rs">${esc(r.sub)}</div>
+      </div>`;
     return `
       ${ownerPill(slide)}
-      <p class="fl-kick">${esc(slide.kicker)}</p>
+      <p class="fl-kick cr-kick">${esc(slide.kicker)}</p>
       <h1 class="fl-title cr-title">${esc(slide.title)}</h1>
-      <div class="cr-lbl" style="left:80px">${esc(slide.criteria_label)}</div>
-      <div class="cr-lbl" style="left:621px">${esc(slide.results_label)}</div>
+      <div class="cr-lbl">${esc(slide.criteria_label)}</div>
       <div class="cr-left">${slide.criteria.map(crit).join("")}</div>
-      <div class="cr-total"><div class="cr-tl">${esc(t.label)}</div><div class="cr-tv">${esc(t.value)}</div><div class="cr-ts">${esc(t.sub)}</div></div>
-      <div class="cr-lem"><div class="cr-ll">${esc(w.label)}</div><div class="cr-lv">${esc(w.value)}</div><div class="cr-ls">${esc(w.sub)}</div>
-        <div class="cr-split">${w.split.map(s => `<div class="cr-sp t-${esc(s.tone)}"><div>${esc(s.label)}</div><b>${esc(s.value)}</b><span>${esc(s.sub)}</span></div>`).join("")}</div>
-      </div>`;
+      <div class="cr-results">${slide.results.map(res).join("")}</div>`;
   }
 
   // screenshot gallery: any number of images fitted into a grid under the title
