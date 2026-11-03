@@ -419,6 +419,30 @@
       </div>`;
   }
 
+  // testing ad set performance: grouped tables with ROAS + 1DC/Incr sub-values, action pills, summary boxes
+  function perf(slide) {
+    const TONE = { r: "red", g: "green", n: "" };
+    const win = w => `<td class="pf-w"><b>${esc(w[0])}</b><div>1DC <span class="t-${TONE[w[3]]}">${esc(w[1])}</span> · Incr <span class="t-${TONE[w[4]]}">${esc(w[2])}</span></div></td>`;
+    const row = r => `<tr>
+        <td class="pf-n">${esc(r.name)}</td>
+        <td class="pf-d ${r.to === "Website" ? "web" : "pre"}">${esc(r.to)}</td>
+        <td class="pf-r">${esc(r.budget)}</td><td class="pf-r">${esc(r.spend)}</td>
+        ${r.w.map(win).join("")}
+        <td class="pf-a"><span class="${esc(r.action.toLowerCase())}">${esc(r.action)}</span></td>
+      </tr>`;
+    const group = g => `
+      <div class="pf-g">${esc(g.title)}</div>
+      <table class="pf-t"><thead><tr><th>Ad set (${g.rows.length})</th><th>Directing to</th><th>Budget</th><th>L7D Spend</th><th>L7D ROAS</th><th>L3D ROAS</th><th>Yday ROAS</th><th>Action</th></tr></thead>
+      <tbody>${g.rows.map(row).join("")}</tbody></table>`;
+    const box = b => `<div class="pf-box ${esc(b.tone)}"><h3>${esc(b.title)}</h3><ul>${b.items.map(i => `<li><b>${esc(i.b)}</b>${esc(i.t || "")}${i.i ? ` <em>${esc(i.i)}</em>` : ""}</li>`).join("")}</ul></div>`;
+    return `
+      <h1 class="pf-title">${esc(slide.title)}</h1>
+      ${slide.groups.map(group).join("")}
+      <div class="pf-note">${esc(slide.note)}</div>
+      <div class="pf-boxes">${slide.boxes.map(box).join("")}</div>
+      <div class="pf-foot">${esc(slide.footnote)}</div>`;
+  }
+
   // screenshot gallery: any number of images fitted into a grid under the title
   function gallery(slide) {
     const imgs = slide.images || [];
@@ -513,7 +537,7 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf };
   const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1 };
 
   window.LEMSlides = {
