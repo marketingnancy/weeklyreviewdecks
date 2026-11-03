@@ -403,14 +403,16 @@
       <div class="cr-results">${slide.results.map(res).join("")}</div>`;
   }
 
-  // summary: "what we did" and "the move" boxes with rows aligned across; a side may be left blank
-  function summary(slide, meta) {
+  // summary: "what we did" and "the move" panels with rows aligned across
+  function summary(slide) {
     const n = slide.rows.length;
-    const cell = (side, t, i) => `<div class="su-c su-${side}${i === n - 1 ? " last" : ""}${t ? "" : " blank"}">${t ? esc(t) : "—"}</div>`;
+    const cell = (side, t, i) => `<div class="su-c su-${side}${i === n - 1 ? " last" : ""}">${esc(t)}</div>`;
     const rows = slide.rows.map((r, i) => `
-      ${cell("did", r.did, i)}<div class="su-arrow">${r.did && r.move ? "→" : ""}</div>${cell("move", r.move, i)}`).join("");
+      ${cell("did", r.did, i)}<div class="su-arrow">→</div>${cell("move", r.move, i)}`).join("");
     return `
-      ${header(slide, meta)}
+      ${ownerPill(slide)}
+      <p class="fl-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title">${esc(slide.title)}</h1>
       <div class="su-grid" style="grid-template-rows:auto repeat(${n},1fr)">
         <div class="su-h su-did">${esc(slide.did_label)}</div><div></div><div class="su-h su-move">${esc(slide.move_label)}</div>
         ${rows}
@@ -512,7 +514,7 @@
   }
 
   const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1 };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
