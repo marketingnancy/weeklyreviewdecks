@@ -663,3 +663,27 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .pf-w b{font-size:12.5px}
 .pf-n{font-size:9.25px}
 .pf-foot{text-align:left}
+
+/* ── revenue goal v2 ───────────────────────────────────────────────────────── */
+.slide:has(.gf-banner){background:#100c1f}
+.fl-kick.gf-kick{left:60px;top:30px}
+.fl-title.gf-title{left:60px;top:56px;font-size:38px}
+.gf-banner{position:absolute;left:60px;right:60px;top:118px;height:80px;background:#1f1840;border-radius:10px;display:flex;align-items:center;justify-content:space-between;padding:0 22px}
+.gf-step{min-width:0}
+.gf-sl{color:#9e95c4;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+.gf-sv{color:var(--lav);font-size:20px;font-weight:800;margin-top:3px;white-space:nowrap}
+.gf-sv.plain{color:#fff}
+.gf-ss{color:#8f88aa;font-size:9px;margin-top:3px;white-space:nowrap}
+.gf-op{color:#8f88aa;font-size:16px;font-weight:700;padding:0 6px}
+.gf-panels{position:absolute;left:60px;right:60px;top:212px;bottom:26px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gf-panel{display:flex;flex-direction:column;background:#1f1840;border:1px solid #2f2756;border-radius:12px;padding:16px 28px 10px;min-height:0}
+.gf-panel.goal{border:2px solid var(--lav)}
+.gf-ph{color:#9e95c4;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid #2f2756}
+.gf-panel.goal .gf-ph{color:var(--lav)}
+.gf-rows{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;min-height:0}
+.gf-rl{color:#9e95c4;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.gf-rv{color:#a59cc9;font-size:36px;font-weight:800;line-height:1.12}
+.gf-panel.goal .gf-rv{color:var(--lav)}
+.gf-panel.goal .gf-rv.green{color:#a4e339}
+.gf-rs{color:#8f88aa;font-size:11px}
+.gf-rx{color:#cdb4f7;font-size:10.5px;font-weight:600;margin-top:3px}

@@ -443,6 +443,29 @@
       <div class="pf-foot">${esc(slide.footnote)}</div>`;
   }
 
+  // revenue goal v2: 5-step formula banner + "current" vs "goal" stacked metric panels
+  function goalflow(slide) {
+    const b = slide.banner;
+    const steps = b.map((x, i) => `${i ? `<span class="gf-op">${esc(x.op)}</span>` : ""}
+      <div class="gf-step"><div class="gf-sl">${esc(x.label)}</div><div class="gf-sv${x.plain ? " plain" : ""}">${esc(x.value)}</div><div class="gf-ss">${esc(x.sub)}</div></div>`).join("");
+    const panel = p => `
+      <div class="gf-panel ${esc(p.tone)}">
+        <div class="gf-ph">${esc(p.title)}</div>
+        <div class="gf-rows">${p.rows.map(r => `<div class="gf-row">
+          <div class="gf-rl">${esc(r.label)}</div>
+          <div class="gf-rv${r.green ? " green" : ""}">${esc(r.value)}</div>
+          <div class="gf-rs">${esc(r.sub)}</div>
+          ${r.extra ? `<div class="gf-rx">${esc(r.extra)}</div>` : ""}
+        </div>`).join("")}</div>
+      </div>`;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick gf-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title gf-title">${esc(slide.title)}</h1>
+      <div class="gf-banner">${steps}</div>
+      <div class="gf-panels">${panel(slide.current)}${panel(slide.goal)}</div>`;
+  }
+
   // screenshot gallery: any number of images fitted into a grid under the title
   function gallery(slide) {
     const imgs = slide.images || [];
@@ -537,8 +560,8 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1 };
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
