@@ -719,3 +719,4 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .it-wr .t-green{color:#a4e339}.it-wr .t-lav{color:var(--lav)}.it-wr .t-orange{color:#f39a3c}
 .it-grid{position:absolute;left:800px;top:64px;width:364px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px;background:#100c1f}
 .it-grid img{width:100%;aspect-ratio:112/199;object-fit:cover;border-radius:6px;display:block}
+.it-card:nth-child(3) img{object-position:top}
