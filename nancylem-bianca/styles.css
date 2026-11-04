@@ -687,3 +687,7 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .gf-panel.goal .gf-rv.green{color:#a4e339}
 .gf-rs{color:#8f88aa;font-size:11px}
 .gf-rx{color:#cdb4f7;font-size:10.5px;font-weight:600;margin-top:3px}
+.cr-left:has(~ .cr-foot){bottom:76px}
+.cr-results:has(~ .cr-foot){bottom:76px}
+.cr-foot{position:absolute;left:60px;right:60px;bottom:32px;text-align:center;color:#8f88aa;font-size:12.5px}
+.cr-foot b{color:var(--lav)}

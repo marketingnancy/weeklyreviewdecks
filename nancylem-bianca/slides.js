@@ -400,7 +400,8 @@
       <h1 class="fl-title cr-title">${esc(slide.title)}</h1>
       <div class="cr-lbl">${esc(slide.criteria_label)}</div>
       <div class="cr-left">${slide.criteria.map(crit).join("")}</div>
-      <div class="cr-results">${slide.results.map(res).join("")}</div>`;
+      <div class="cr-results">${slide.results.map(res).join("")}</div>
+      ${slide.footer ? `<div class="cr-foot"><b>${esc(slide.footer.b)}</b> · ${esc(slide.footer.t)}</div>` : ""}`;
   }
 
   // summary: "what we did" and "the move" panels with rows aligned across
