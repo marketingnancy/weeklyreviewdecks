@@ -596,8 +596,25 @@
       <div class="cd-wrap">${slide.tables.map(table).join("")}</div>`;
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1 };
+  // "when to scale, hold or cut": metric panels on top, rule table below. A table cell may be [text, tone].
+  function optimize(slide) {
+    const box = b => `<div class="op-box"><div class="op-bl">${esc(b.label)}</div><div class="op-bv">${esc(b.value)}</div>${b.sub ? `<div class="op-bs">${esc(b.sub)}</div>` : ""}</div>`;
+    const panel = p => `<div class="op-panel"><div class="cd-lbl">${esc(p.label)}</div><div class="op-boxes">${p.boxes.map(box).join("")}</div><div class="op-foot">${rich(p.foot)}</div></div>`;
+    const cell = c => Array.isArray(c) ? `<td class="t-${esc(c[1])}">${rich(c[0])}</td>` : `<td>${rich(c)}</td>`;
+    const t = slide.table;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick cd-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title cd-title">${esc(slide.title)}</h1>
+      <div class="op-panels">${slide.panels.map(panel).join("")}</div>
+      <table class="cd-t op-t">
+        <thead><tr>${t.head.map((h, i) => `<th style="width:${t.widths[i]}">${esc(h)}</th>`).join("")}</tr></thead>
+        <tbody>${t.rows.map(r => `<tr>${r.map(cell).join("")}</tr>`).join("")}</tbody>
+      </table>`;
+  }
+
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },

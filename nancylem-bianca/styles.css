@@ -736,3 +736,20 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .cd-t .sc-red{color:#c0392b}
 .cd-note{margin-top:12px;color:#c9c2e0;font-size:16px;line-height:1.4}
 .cd-note .sc-green{color:#7fd88a;font-weight:500}
+
+/* ── when to scale, hold or cut (dark: panels + rule table) ────────────────── */
+.op-panels{position:absolute;left:85px;right:85px;top:182px;display:grid;grid-template-columns:1fr 1fr;gap:21px}
+.op-panel{background:#1d1838;border-radius:13px;padding:19px 21px 18px}
+.op-boxes{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.op-box{background:#2a2250;border-radius:9px;padding:15px 16px 13px;min-height:142px;box-sizing:border-box}
+.op-bl{color:#d9d2ef;font-size:16px;font-weight:700;line-height:1.3;min-height:42px}
+.op-bv{color:#fff;font-size:38px;font-weight:800;letter-spacing:.01em;line-height:1.1;margin-top:5px}
+.op-bs{color:#a4e339;font-size:16px;font-weight:700;margin-top:4px}
+.op-foot{margin-top:13px;color:#d9d2ef;font-size:16px}
+.op-foot .sc-green{color:#a4e339;font-weight:500}
+.op-foot .sc-red{color:#ff6b6b;font-weight:500}
+.cd-t.op-t{position:absolute;left:85px;top:443px;width:calc(100% - 170px)}
+.op-t th{vertical-align:top;padding:8px 10px}
+.op-t td.t-green{color:#2e8b57}
+.op-t td.t-amber{color:#b8860b}
+.op-t td.t-red{color:#c0392b}
