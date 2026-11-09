@@ -538,8 +538,8 @@
       <div class="ex-cap">${esc(slide.caption)}</div>`;
   }
 
-  // light scorecard: header + callout + metric cards. Text supports **bold** and [[red]].
-  const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[\[(.+?)\]\]/g, '<b class="sc-red">$1</b>');
+  // light scorecard: header + callout + metric cards. Text supports **bold**, [[red]] and {{green}}.
+  const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[\[(.+?)\]\]/g, '<b class="sc-red">$1</b>').replace(/\{\{(.+?)\}\}/g, '<b class="sc-green">$1</b>');
   function cards(slide) {
     const card = c => {
       const cols = c.cols || slide.cols;
