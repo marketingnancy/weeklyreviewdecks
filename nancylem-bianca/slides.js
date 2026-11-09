@@ -578,8 +578,26 @@
     document.body.appendChild(ov);
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1 };
+  // "how a sale gets credited": two dark-header tables side by side. Cells support **bold**, [[red]], {{green}}.
+  function credit(slide) {
+    const table = t => `
+      <div class="cd-col">
+        <div class="cd-lbl">${esc(t.label)}</div>
+        <table class="cd-t"${t.widths ? "" : ""}>
+          <thead><tr>${t.head.map((h, i) => `<th${t.widths ? ` style="width:${t.widths[i]}"` : ""}>${esc(h)}</th>`).join("")}</tr></thead>
+          <tbody>${t.rows.map(r => `<tr>${r.map(c => `<td>${rich(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+        </table>
+        ${t.note ? `<div class="cd-note">${rich(t.note)}</div>` : ""}
+      </div>`;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick cd-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title cd-title">${esc(slide.title)}</h1>
+      <div class="cd-wrap">${slide.tables.map(table).join("")}</div>`;
+  }
+
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },

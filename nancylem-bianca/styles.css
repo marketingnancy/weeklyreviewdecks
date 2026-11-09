@@ -721,3 +721,18 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .it-grid{position:absolute;left:800px;top:64px;width:364px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:7px;background:#100c1f}
 .it-grid img{width:100%;aspect-ratio:112/199;object-fit:cover;border-radius:6px;display:block}
 .it-card:nth-child(3) img{object-position:top}
+
+/* ── how a sale gets credited (dark, two tables) ───────────────────────────── */
+.fl-kick.cd-kick{left:85px;top:78px;font-size:16px;letter-spacing:.16em;color:#b98cf2}
+.fl-title.cd-title{left:85px;top:104px;font-size:52px;letter-spacing:-.035em;color:#f2eefc}
+.cd-wrap{position:absolute;left:85px;right:85px;top:190px;display:grid;grid-template-columns:573px 1fr;gap:27px;align-items:start}
+.cd-lbl{color:#b98cf2;font-size:16px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:11px}
+.cd-t{width:100%;border-collapse:separate;border-spacing:0;border-radius:9px;overflow:hidden;background:#fff;font-size:16px;color:#1d1a33}
+.cd-t th{background:#2a2250;color:#f2eefc;font-weight:700;text-align:left;padding:7px 10px;line-height:1.25}
+.cd-t td{padding:6px 10px;line-height:1.25;vertical-align:top;border-top:1px solid #e8e4f2}
+.cd-t tbody tr:nth-child(even) td{background:#f3f0fb}
+.cd-t tbody tr:first-child td{border-top:0}
+.cd-t .sc-green{color:#2e8b57;font-weight:500}
+.cd-t .sc-red{color:#c0392b}
+.cd-note{margin-top:12px;color:#c9c2e0;font-size:16px;line-height:1.4}
+.cd-note .sc-green{color:#7fd88a;font-weight:500}
