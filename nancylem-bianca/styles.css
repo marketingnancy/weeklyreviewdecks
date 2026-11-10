@@ -753,3 +753,11 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .op-t td.t-green{color:#2e8b57}
 .op-t td.t-amber{color:#b8860b}
 .op-t td.t-red{color:#c0392b}
+
+/* ── ad set / campaign action tables (dark, full width) ─────────────────────── */
+.fl-kick.at-kick{left:85px;top:63px;font-size:16px;letter-spacing:.16em;color:#b98cf2}
+.fl-title.at-title{left:85px;top:88px;font-size:40px;letter-spacing:-.035em;color:#f2eefc}
+.at-wrap{position:absolute;left:85px;right:85px;top:149px}
+.cd-t.op-t.at-t{position:static;width:100%;table-layout:fixed}
+.at-t td{padding:6px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-wrap .cd-note{margin-top:14px}

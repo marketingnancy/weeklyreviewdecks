@@ -613,8 +613,25 @@
       </table>`;
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1 };
+  // full-width ad set / campaign table (dark). A cell may be [text, tone]; tone green/red/amber colours it.
+  function adtable(slide) {
+    const t = slide.table;
+    const cell = c => Array.isArray(c) ? `<td class="t-${esc(c[1])}">${rich(c[0])}</td>` : `<td>${rich(c)}</td>`;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick at-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title at-title">${esc(slide.title)}</h1>
+      <div class="at-wrap">
+        <table class="cd-t op-t at-t">
+          <thead><tr>${t.head.map((h, i) => `<th style="width:${t.widths[i]}">${esc(h)}</th>`).join("")}</tr></thead>
+          <tbody>${t.rows.map(r => `<tr>${r.map(cell).join("")}</tr>`).join("")}</tbody>
+        </table>
+        ${slide.footnote ? `<div class="cd-note">${rich(slide.footnote)}</div>` : ""}
+      </div>`;
+  }
+
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1, adtable: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
