@@ -761,3 +761,15 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .cd-t.op-t.at-t{position:static;width:100%;table-layout:fixed}
 .at-t td{padding:6px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .at-wrap .cd-note{margin-top:14px}
+
+/* ── LP testing (dark: text header + cropped page/photo screenshot) ─────────── */
+.fl-kick.lp-kick{left:90px;top:44px;font-size:16px;letter-spacing:.2em;color:#b98cf2}
+.fl-title.lp-title{left:90px;top:68px;font-size:50px;letter-spacing:-.04em;color:#f2eefc}
+.lp-sub{position:absolute;left:90px;top:132px;width:1020px;color:#c9c2e0;font-size:16.5px;line-height:1.2}
+.lp-sub.narrow{width:690px}
+.lp-sub b{color:#fff;font-weight:600}
+.lp-aside{position:absolute;left:925px;top:83px;width:304px;box-sizing:border-box;border:1px solid #c0456e;border-radius:9px;background:#221a40;padding:14px 17px}
+.lp-al{color:#e0679a;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.lp-at{color:#d9d2ef;font-size:14px;line-height:1.4;margin-top:7px}
+.lp-at b{color:#fff;font-weight:700}
+.lp-shot{position:absolute;left:86px;width:1146px;height:auto;cursor:zoom-in}

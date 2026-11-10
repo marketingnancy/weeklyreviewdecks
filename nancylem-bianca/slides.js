@@ -630,8 +630,19 @@
       </div>`;
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1, adtable: 1 };
+  // LP testing: text header (+ optional question box) over a cropped screenshot of the pages/photos
+  function lpshots(slide) {
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick lp-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title lp-title">${esc(slide.title)}</h1>
+      <div class="lp-sub${slide.aside ? " narrow" : ""}">${rich(slide.subtitle)}</div>
+      ${slide.aside ? `<div class="lp-aside"><div class="lp-al">${esc(slide.aside.label)}</div><div class="lp-at">${rich(slide.aside.text)}</div></div>` : ""}
+      <img class="lp-shot zoomable" style="top:${slide.shot_top}px" src="${slide.image}" alt="${esc(slide.title)}">`;
+  }
+
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable, lpshots };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1, adtable: 1, lpshots: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },
