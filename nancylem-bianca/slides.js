@@ -641,8 +641,21 @@
       <img class="lp-shot zoomable" style="top:${slide.shot_top}px" src="${slide.image}" alt="${esc(slide.title)}">`;
   }
 
-  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable, lpshots };
-  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1, adtable: 1, lpshots: 1 };
+  // LP photo set: gallery grid card + side photos, all from the original files
+  function photoset(slide) {
+    const side = x => `<figure class="ps-side"><img class="zoomable" src="${x.image}" alt="${esc(x.caption)}"><figcaption>${rich(x.caption)}</figcaption></figure>`;
+    return `
+      ${ownerPill(slide)}
+      <p class="fl-kick lp-kick">${esc(slide.kicker)}</p>
+      <h1 class="fl-title lp-title">${esc(slide.title)}</h1>
+      <div class="lp-sub">${rich(slide.subtitle)}</div>
+      <div class="ps-gal"><div class="ps-grid">${slide.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("")}</div></div>
+      <div class="ps-cap">${rich(slide.gallery_caption)}</div>
+      <div class="ps-sides">${slide.side.map(side).join("")}</div>`;
+  }
+
+  const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable, lpshots, photoset };
+  const DARK = { goal: 1, panels: 1, attribution: 1, rules: 1, roadmap: 1, example: 1, flow: 1, goalplan: 1, gallery: 1, criteria: 1, questions: 1, summary: 1, goalflow: 1, iterations: 1, credit: 1, optimize: 1, adtable: 1, lpshots: 1, photoset: 1 };
 
   window.LEMSlides = {
     isDark(slide) { return !!DARK[slide.section]; },

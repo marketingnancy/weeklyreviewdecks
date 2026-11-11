@@ -773,3 +773,15 @@ table.te-table td{border:1px solid #ddd8e6;padding:4px 8px;vertical-align:middle
 .lp-at{color:#d9d2ef;font-size:14px;line-height:1.4;margin-top:7px}
 .lp-at b{color:#fff;font-weight:700}
 .lp-shot{position:absolute;left:86px;width:1146px;height:auto;cursor:zoom-in}
+
+/* ── LP photo set (dark: gallery card + side photos) ────────────────────────── */
+.ps-gal{position:absolute;left:91px;top:232px;width:735px;box-sizing:border-box;background:#fff;border-radius:9px;padding:7px}
+.ps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 17px;padding:0}
+.ps-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;display:block;cursor:zoom-in}
+.ps-cap{position:absolute;left:91px;top:604px;color:#c9c2e0;font-size:13.5px}
+.ps-cap b{color:#fff;font-weight:700}
+.ps-sides{position:absolute;left:852px;top:233px;right:52px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ps-side{margin:0}
+.ps-side img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;border:2px solid #3a3160;box-sizing:border-box;display:block;cursor:zoom-in}
+.ps-side figcaption{margin-top:12px;color:#fff;font-size:13.5px;font-weight:700}
+.ps-side figcaption .sc-green{color:#f5c84b;font-weight:700}
