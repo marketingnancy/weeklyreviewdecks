@@ -651,7 +651,8 @@
       <div class="lp-sub">${rich(slide.subtitle)}</div>
       <div class="ps-gal"><div class="ps-grid">${slide.images.map(src => `<img class="zoomable" src="${src}" alt="">`).join("")}</div></div>
       <div class="ps-cap">${rich(slide.gallery_caption)}</div>
-      <div class="ps-sides">${slide.side.map(side).join("")}</div>`;
+      <div class="ps-sides">${slide.side.map(side).join("")}</div>
+      ${slide.below ? `<img class="ps-below zoomable" src="${slide.below.image}" alt="Mobile view">` : ""}`;
   }
 
   const RENDER = { goal, scorecard, campaigns, lp, creative, demographics, decision, panels, attribution, rules, image, testing, roadmap, cards, example, flow, goalplan, gallery, criteria, questions, angles, summary, perf, goalflow, iterations, credit, optimize, adtable, lpshots, photoset };
