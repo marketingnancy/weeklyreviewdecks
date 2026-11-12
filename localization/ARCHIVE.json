@@ -1,0 +1,10 @@
+{
+  "status": "archived",
+  "notice_date": "2026-11-12",
+  "dashboard_discontinued": true,
+  "daily_workflow": "report-only",
+  "historical_assets_preserved": true,
+  "new_dashboard_build_or_data_publication": false,
+  "private_reporting_repository": "https://github.com/marketingnancy/localization-report-automation",
+  "public_credentials_or_private_data_added": false
+}

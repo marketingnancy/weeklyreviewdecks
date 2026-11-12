@@ -12,9 +12,9 @@ live only in each deck's private source repo and are never published here.
 
 ## Decks
 
-- **[localization/](localization/)** — **Localization Daily** dashboard (non-English markets): revenue,
-  ROAS, campaigns, creative & translation QA. Baked from the source dashboard
-  (`python3 -m localization.web.build_static`).
+- **[localization/](localization/README.md)**: **Archived Localization dashboard**.
+  Historical files remain intact. Daily reporting is now report-only, with the source and
+  Claude handover in the separate private `marketingnancy/localization-report-automation` repository.
 - **[nancylem/](nancylem/)** — **LEM Weekly Review**: paid-acquisition review for the LEM hero product
   (*Lem Clitoral Massager*) — Command Scorecard, campaign efficiency by funnel, landing-page analysis,
   top creative, and age/gender. An 18-slide present-mode deck. Source repo: `lem-weekly-review` (private,
@@ -24,13 +24,16 @@ Both decks are **password-protected** — credentials are shared with the team p
 
 ## How a deck gets published
 
-Each deck is built and encrypted in its own source repo, then its `build_static/` output is copied
+The localization archive is excluded from this publication workflow. Do not rebuild or
+republish it during daily report runs.
+
+An active deck is built and encrypted in its own source repo, then its `build_static/` output is copied
 into a sibling folder here:
 
 ```bash
 # in the deck's source repo (e.g. ~/Documents/lem-weekly-review)
 python3 -m app.build_static                                   # bake deck.json + copy the SPA
-# scramble the data — localization: web/encrypt.js (AES) · LEM: web/lock.js (XOR):
+# encrypt an active LEM deck; the localization archive is not rebuilt:
 DECK_PASSWORD='<password>' DECK_USER='nancy' node web/lock.js build_static
 # then copy build_static/* into weeklyreviewdecks/<deck>/ , commit, and push
 ```
