@@ -1,0 +1,59 @@
+/* The original design lives in original.css. These are required pre-photo and mobile additions only. */
+.photo-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #f6f3ed;
+  color: #5f584e;
+  border: 1px dashed #b5ac9b;
+  text-align: center;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  overflow: hidden;
+}
+.slot-label { font-size: 16px; line-height: 1.4; font-weight: 700; }
+.slot-size { font-size: 13px; line-height: 1.5; font-weight: 500; }
+.slot-status { font-size: 12px; color: #797165; }
+.photo-slot[data-compact='gallery'] { padding: 12px; gap: 6px; }
+.photo-slot[data-compact='gallery'] .slot-label { font-size: 12px; }
+.photo-slot[data-compact='gallery'] .slot-size { font-size: 10px; }
+.photo-slot[data-compact='expert'] { padding: 3px; gap: 2px; }
+.photo-slot[data-compact='expert'] .slot-label { font-size: 8px; line-height: 1.15; }
+.photo-slot[data-compact='expert'] .slot-size { font-size: 7px; line-height: 1.1; }
+.photo-slot[data-compact='review'] { padding: 6px; gap: 5px; }
+.photo-slot[data-compact='review'] .slot-label { font-size: 10px; line-height: 1.2; }
+.photo-slot[data-compact='review'] .slot-size { font-size: 8px; line-height: 1.3; }
+.product-image-link { display: block; color: inherit; text-decoration: none; }
+.purchase-cta { text-decoration: none; min-height: 44px; }
+a:focus-visible, button:focus-visible { outline: 3px solid #FF1493; outline-offset: 4px; }
+.filled-photo { display: block; }
+.animated-unboxing { display: block; }
+.animated-unboxing img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
+#root[data-version='2'] article p.text-sm,
+#root[data-version='2'] article p.text-xs,
+#root[data-version='2'] article li.text-sm,
+#root[data-version='2'] article .text-sm p,
+#root[data-version='2'] article .text-sm li,
+#root[data-version='2'] article .text-xs p,
+#root[data-version='2'] article .text-xs li { font-size: 16px; }
+#reviews { scroll-margin-top: 84px; }
+.v2-draft-note { font-size: 13px; line-height: 1.5; color: #786956; margin-bottom: 18px; }
+[data-copy-slot='body'], [data-copy-slot='hook'] { color: #6c6458; }
+@media (max-width: 767px) {
+  .purchase-cta { width: 100%; max-width: 100%; padding-left: 12px; padding-right: 12px; white-space: normal; text-align: center; }
+  article p, article li, article blockquote { font-size: 16px; }
+  #reviews p:not(.text-xs), #reviews [data-slot='card'] p:not(.text-xs) { font-size: 16px; }
+  footer p, footer li { font-size: 16px; }
+  table { table-layout: fixed; }
+  table th, table td { padding: 10px 5px; font-size: 16px; overflow-wrap: anywhere; }
+  .photo-slot { padding: 16px; }
+  .photo-slot[data-compact='gallery'] { padding: 8px; }
+  .photo-slot[data-compact='expert'] { padding: 3px; }
+  .photo-slot[data-compact='review'] { padding: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; }
+}

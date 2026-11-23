@@ -1,0 +1,41 @@
+/* Original imagery and article styling remain unchanged. */
+.gallery-zoom-trigger { display: block; padding: 0; color: inherit; background: transparent; cursor: zoom-in; font: inherit; align-self: start; }
+.gallery-zoom-trigger img { display: block; }
+.gallery-lightbox { position: fixed; inset: 0; margin: 0; padding: 0; border: 0; border-radius: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; overflow: hidden; background: transparent; color: #fff; }
+.gallery-lightbox::backdrop { background: rgba(0, 0, 0, .9); }
+.gallery-lightbox-stage { position: absolute; inset: 56px 64px 24px; display: flex; justify-content: center; align-items: center; }
+.gallery-lightbox-image { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; }
+.gallery-lightbox button { position: absolute; display: flex; justify-content: center; align-items: center; min-height: 44px; min-width: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; color: #fff; cursor: pointer; text-shadow: 0 1px 5px #000; }
+.gallery-lightbox button:focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+.gallery-lightbox-close { top: max(10px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); font-size: 30px; font-weight: 300; }
+.gallery-lightbox-prev, .gallery-lightbox-next { top: 50%; transform: translateY(-50%); font-size: 38px; font-weight: 300; }
+.gallery-lightbox-prev { left: max(8px, env(safe-area-inset-left, 0px)); }
+.gallery-lightbox-next { right: max(8px, env(safe-area-inset-right, 0px)); }
+.scroll-offer[hidden] { display: none !important; }
+.scroll-offer { position: fixed; top: var(--offer-masthead-height, 73px); left: 0; right: 0; z-index: 45; background: #ff1493; color: #fff; box-shadow: 0 3px 14px #0002; }
+.scroll-offer-inner { max-width: 1152px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 20px; }
+.scroll-offer-proof { font-size: 14px; line-height: 1.35; font-weight: 600; }
+.scroll-offer-proof::before { content: '★ '; color: #ffe66a; }
+.scroll-offer-price { display: flex; align-items: center; gap: 10px; margin-left: auto; white-space: nowrap; }
+.scroll-offer-current { font-size: 26px; font-weight: 750; }
+.scroll-offer-old { opacity: .85; font-size: 17px; }
+.scroll-offer-save { padding: 4px 8px; border-radius: 4px; background: #df1742; font-size: 14px; font-weight: 700; }
+.scroll-offer-shop { display: flex; align-items: center; justify-content: center; flex-shrink: 0; min-width: 136px; min-height: 48px; padding: 10px 20px; background: #fff; border-radius: 12px; color: #dc0078; font-size: 18px; font-weight: 700; text-decoration: none; }
+.scroll-offer-shop:hover { background: #fff1f8; }
+.scroll-offer-shop:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+html:has(body.has-scroll-offer):not(:has(body.has-mobile-offer)) { scroll-padding-top: calc(var(--offer-masthead-height, 73px) + var(--offer-bar-height, 68px) + 12px); }
+body.gallery-is-open .scroll-offer { visibility: hidden; }
+@media (max-width: 767px) {
+  header { padding-top: env(safe-area-inset-top, 0px); }
+  .scroll-offer { top: auto; bottom: 0; box-shadow: 0 -3px 14px #0002; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .scroll-offer-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); }
+  .scroll-offer-proof { grid-column: 1 / -1; font-size: 12px; line-height: 1.4; }
+  .scroll-offer-price { margin: 0; gap: 8px; }
+  .scroll-offer-current { font-size: 24px; }
+  .scroll-offer-old { font-size: 15px; }
+  .scroll-offer-save { font-size: 12px; padding: 3px 5px; }
+  .scroll-offer-shop { min-width: 118px; min-height: 48px; font-size: 17px; padding: 8px 12px; }
+  body.has-mobile-offer { padding-bottom: calc(var(--offer-bar-height, 100px) + 16px); }
+  .gallery-lightbox-stage { inset: max(60px, calc(env(safe-area-inset-top, 0px) + 44px)) max(8px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+  .gallery-lightbox-image { border-radius: 10px; }
+}
