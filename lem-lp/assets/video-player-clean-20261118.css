@@ -1,0 +1,15 @@
+/* V2/V3 only: retain the original footage and browser-native controls. */
+.unboxing-video { border: 0; box-shadow: none; }
+.unboxing-video::-webkit-media-controls-enclosure {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.unboxing-video::-webkit-media-controls-panel {
+  border: 0 !important;
+  border-top: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
