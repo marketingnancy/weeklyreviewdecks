@@ -33,3 +33,9 @@ resolution (e.g. in Higgsfield, using 280915/280916 as reference) before upload.
 Use these for Facebook/Instagram feed placements; use the 9:16 versions for Stories/Reels.
 Made as 2048x2048 GPT Image 2.6 renders with all elements kept in the centre 80% width, then centre-cropped to 4:5.
 Square source assets in the AdManage library: 280926 (CLIFFHANGER), 280927 (NOT WHAT IT LOOKS LIKE), 280928 (NOBODY SAW THIS COMING).
+
+## Zoomed-out 9:16 versions (1080x1920), in `story-9x16-zoomed/`  <- USE THESE
+All text, the background word, product and pill sit inside the centre 4:5 area (y 460-1385 of 1920),
+so the same file shows fully in Feed (4:5 crop) and in Stories/Reels (full 9:16).
+Built from the square GPT renders (280926-280928) by extending the top background and fading the reflection
+at the bottom (GPT's safety filter blocked direct 9:16 renders of #1 and #2). Alternative native 9:16 render of #3: asset 280929.
