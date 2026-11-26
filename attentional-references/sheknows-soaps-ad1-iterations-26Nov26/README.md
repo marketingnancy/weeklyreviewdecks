@@ -28,3 +28,8 @@ Superseded: 280915 ("HER QUIETEST PLOT TWIST", repeated the live headline "Her Q
 280916 ("A SMALL YELLOW SURPRISE", repeated Ad 1 image text). Their text-swaps were blocked by the GPT Image
 safety filter, so #1 and #2 were redone with Nano Banana 2 Lite edit at 768x1376: upscale or rerun at higher
 resolution (e.g. in Higgsfield, using 280915/280916 as reference) before upload.
+
+## Feed 4:5 versions (1080x1350), in `feed-4x5/`
+Use these for Facebook/Instagram feed placements; use the 9:16 versions for Stories/Reels.
+Made as 2048x2048 GPT Image 2.6 renders with all elements kept in the centre 80% width, then centre-cropped to 4:5.
+Square source assets in the AdManage library: 280926 (CLIFFHANGER), 280927 (NOT WHAT IT LOOKS LIKE), 280928 (NOBODY SAW THIS COMING).
